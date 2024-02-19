@@ -21,3 +21,14 @@
 go.work
 
 api-login
+
+
+routers/commentsRouter*
+swagger/
+tmp/
+logs/
+
+#nacos
+cache/
+log/
+*.log
