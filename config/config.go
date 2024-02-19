@@ -3,7 +3,7 @@ package config
 import (
 	"strconv"
 
-	"github.com/beego/beego/config/env"
+	"github.com/beego/beego/v2/core/config/env"
 	"github.com/beego/beego/v2/server/web"
 )
 

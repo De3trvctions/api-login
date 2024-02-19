@@ -1,6 +1,8 @@
 package system
 
-import "api-login/consts"
+import (
+	"api-login/consts"
+)
 
 type LoginController struct {
 	BaseController

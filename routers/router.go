@@ -9,8 +9,6 @@ import (
 
 func init() {
 	systemNs := web.NewNamespace("/system",
-		/*********************系统路由********************************/
-		// 登录
 		web.NSNamespace("/user", web.NSInclude(&system.LoginController{})),
 	)
 	web.AddNamespace(systemNs)

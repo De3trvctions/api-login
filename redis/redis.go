@@ -13,6 +13,7 @@ var (
 	redisCli *redis.Client
 )
 
+// TODO: Change to nacos
 func InitRedis() {
 	once.Do(func() {
 		redisCli = redis.NewClient(&redis.Options{
@@ -22,10 +23,6 @@ func InitRedis() {
 		})
 	})
 	logs.Info("[InitRedis] Init Redis Success")
-}
-
-func GetClient() *redis.Client {
-	return redisCli
 }
 
 func Set(key string, val any, expiration ...time.Duration) error {
