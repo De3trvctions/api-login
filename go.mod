@@ -1,12 +1,18 @@
-module login
+module api-login
 
 go 1.20
 
 require github.com/beego/beego/v2 v2.1.0
 
-require github.com/smartystreets/goconvey v1.6.4
+require (
+	github.com/beego/beego v1.12.12
+	github.com/beego/i18n v0.0.0-20161101132742-e9308947f407
+	github.com/go-redis/redis v6.14.2+incompatible
+	github.com/smartystreets/goconvey v1.6.4
+)
 
 require (
+	github.com/Unknwon/goconfig v1.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect

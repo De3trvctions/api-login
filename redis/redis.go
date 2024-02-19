@@ -1,0 +1,56 @@
+package redis
+
+import (
+	"sync"
+	"time"
+
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/go-redis/redis"
+)
+
+var (
+	once     sync.Once
+	redisCli *redis.Client
+)
+
+func InitRedis() {
+	once.Do(func() {
+		redisCli = redis.NewClient(&redis.Options{
+			Addr:     "localhost:6379", // Redis server address
+			Password: "",               // No password
+			DB:       0,                // Default database
+		})
+	})
+	logs.Info("[InitRedis] Init Redis Success")
+}
+
+func GetClient() *redis.Client {
+	return redisCli
+}
+
+func Set(key string, val any, expiration ...time.Duration) error {
+	if val == nil {
+		val = ""
+	}
+	return redisCli.Set(key, val, getDuration(expiration[0])).Err()
+}
+
+func Get(key string) (string, error) {
+	return redisCli.Get(key).Result()
+}
+
+func Del(key ...string) (int64, error) {
+	return redisCli.Del(key...).Result()
+}
+
+func Exists(key ...string) (bool, error) {
+	r, err := redisCli.Exists(key...).Result()
+	return r == int64(len(key)), err
+}
+
+func getDuration(t time.Duration) time.Duration {
+	if t < time.Second {
+		return t * time.Second
+	}
+	return t
+}
