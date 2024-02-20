@@ -1,7 +1,9 @@
 package db
 
 import (
+	_ "api-login/models"
 	"database/sql"
+	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -40,6 +42,16 @@ func InitDB() {
 	if err != nil {
 		logs.Error("[InitDB] Ping DB fail")
 		return
+	}
+	aliasName := "default"
+
+	err = orm.SetDataBaseTZ(aliasName, time.Local)
+	if err != nil {
+		logs.Error(err)
+	}
+	err = orm.RunSyncdb(aliasName, false, true)
+	if err != nil {
+		logs.Error(err)
 	}
 
 	logs.Info("[InitDB] Init DB Success")

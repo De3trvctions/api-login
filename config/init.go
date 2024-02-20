@@ -1,6 +1,7 @@
 package config
 
 import (
+	"api-login/db"
 	"api-login/redis"
 	"strings"
 
@@ -19,6 +20,10 @@ func InitLogs() {
 
 func InitRedis() {
 	redis.InitRedis()
+}
+
+func InitDB() {
+	db.InitDB()
 }
 
 // TODO: Change to nacos

@@ -14,6 +14,7 @@ func main() {
 	// Init required information
 	config.InitLogs()
 	config.InitRedis()
+	config.InitDB()
 	config.InitLanguage()
 	validation.Init()
 
