@@ -2,6 +2,7 @@ package consts
 
 const (
 	SUCCESS_REQUEST = 200
+	LOGIN_LOCK      = 1000
 	FAILED_REQUEST  = 10000
 	SERVER_ERROR    = 40000
 )
