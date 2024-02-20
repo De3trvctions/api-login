@@ -20,14 +20,14 @@ type BaseController struct {
 }
 
 func (ctl *BaseController) Success(obj interface{}) {
-	ctl.Code = consts.SUCCESS
+	ctl.Code = consts.SUCCESS_REQUEST
 	ctl.Result = obj
 	ctl.TraceJson(false)
 }
 
 func (ctl *BaseController) Error(code int64, msg ...string) {
 	if code < 1 {
-		code = consts.ERROR
+		code = consts.SERVER_ERROR
 	}
 	ctl.Code = code
 

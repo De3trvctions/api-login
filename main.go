@@ -3,6 +3,7 @@ package main
 import (
 	"api-login/config"
 	_ "api-login/routers"
+	"api-login/validation"
 	"fmt"
 
 	"github.com/beego/beego/v2/server/web"
@@ -14,6 +15,7 @@ func main() {
 	config.InitLogs()
 	config.InitRedis()
 	config.InitLanguage()
+	validation.Init()
 
 	// redisKey := "mykey"
 	// _ = redis.Set(redisKey, "myvalue", 0)

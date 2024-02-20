@@ -7,6 +7,7 @@ require github.com/beego/beego/v2 v2.1.6
 require (
 	github.com/beego/i18n v0.0.0-20161101132742-e9308947f407
 	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/smartystreets/goconvey v1.8.1
 )
 
@@ -30,6 +31,7 @@ require (
 	github.com/prometheus/procfs v0.10.1 // indirect
 	github.com/shiena/ansicolor v0.0.0-20200904210342-c7312218db18 // indirect
 	github.com/smarty/assertions v1.15.0 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect

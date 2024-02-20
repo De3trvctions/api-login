@@ -1,6 +1,7 @@
 package consts
 
 const (
-	SUCCESS = 200
-	ERROR   = 40000
+	SUCCESS_REQUEST = 200
+	FAILED_REQUEST  = 10000
+	SERVER_ERROR    = 40000
 )
