@@ -22,7 +22,15 @@ func InitRedis() {
 			DB:       0,                // Default database
 		})
 	})
-	logs.Info("[InitRedis] Init Redis Success")
+
+	// Ping the Redis server to check if the connection is successful
+	_, err := redisCli.Ping().Result()
+	if err != nil {
+		logs.Error("[InitRedis] Error connecting to Redis:", err)
+	} else {
+		logs.Info("[InitRedis] Init Redis Success")
+
+	}
 }
 
 func Set(key string, val any, expiration ...time.Duration) error {

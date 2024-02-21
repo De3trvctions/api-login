@@ -36,6 +36,11 @@ func (acc *Account) TableName() string {
 	return "cloud_data_account"
 }
 
+func (acc *Account) SetHashPassword(password string) {
+	hash := md5.Sum([]byte(password))
+	acc.Password = hex.EncodeToString(hash[:])
+}
+
 func (acc *Account) List(req Account) (accountList []Account, errCode int, err error) {
 	qb, _ := orm.NewQueryBuilder("mysql")
 	db := utility.NewDB()
@@ -92,13 +97,9 @@ func (acc *Account) Register(req dto.ReqRegister) (errCode int64, err error) {
 		return
 	}
 
-	// Hashing Password
-	hash := md5.Sum([]byte(req.Password))
-	hashPassword := hex.EncodeToString(hash[:])
-
 	// Assign Value
 	acc.Username = req.Username
-	acc.Password = hashPassword
+	acc.SetHashPassword(req.Password)
 	acc.Email = req.Email
 	acc.SetCreateTime()
 

@@ -2,8 +2,13 @@ package system
 
 import (
 	"api-login/consts"
+	"api-login/models"
 	"api-login/models/dto"
 	"api-login/redis"
+	"api-login/utility"
+	"api-login/validation"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"time"
@@ -27,6 +32,10 @@ func (ctl *LoginController) Login() {
 		logs.Error("[Login] Parse Form Error", err)
 		ctl.Error(consts.FAILED_REQUEST)
 	}
+	if err := validation.ValidateRequest(&req); err != nil {
+		logs.Error("[RegisterController][Register]FormValidate fail, req : %+v, error: %+v", req, err)
+		ctl.Error(consts.PARAM_ERROR)
+	}
 
 	ableLogin, ableLoginRemaindingTime := ctl.getRedisLoginStatus(req.Username)
 
@@ -36,6 +45,25 @@ func (ctl *LoginController) Login() {
 		logs.Error("[LoginController][Login] 账号封锁中。剩余解封时间%d分钟%d秒", leftMin, leftSec)
 		ctl.Error(consts.LOGIN_LOCK, fmt.Sprintf("请在%d分钟%d秒后再进行尝试", leftMin, leftSec))
 	}
+
+	acc := models.Account{}
+	acc.Username = req.Username
+
+	db := utility.NewDB()
+	err := db.Get(&acc, "username")
+	if err != nil {
+		logs.Error("[LoginController][Login] Account not found", err)
+		ctl.Error(consts.USERNAME_NOT_FOUND)
+	}
+
+	hash := md5.Sum([]byte(req.Password))
+	hashPassword := hex.EncodeToString(hash[:])
+	if hashPassword != acc.Password {
+		logs.Error("[LoginController][Login] Password not match. req: %s", hashPassword)
+		ctl.Error(consts.PASSWORD_NOT_MATCH)
+	}
+
+	// TODO Generate JWT Token and return
 
 	ctl.Success("Success")
 }
