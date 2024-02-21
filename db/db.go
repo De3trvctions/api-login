@@ -60,10 +60,3 @@ func InitDB() {
 func GetDB() *sql.DB {
 	return db
 }
-
-// func aaa() {
-// 	aa, _ := orm.NewQueryBuilder("mysql")
-
-// 	aa.Select()
-
-// }
