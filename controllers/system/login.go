@@ -37,7 +37,7 @@ func (ctl *LoginController) Login() {
 		ctl.Error(consts.LOGIN_LOCK, fmt.Sprintf("请在%d分钟%d秒后再进行尝试", leftMin, leftSec))
 	}
 
-	ctl.Error(consts.SERVER_ERROR)
+	ctl.Success("Success")
 }
 
 func (ctl *LoginController) getRedisLoginStatus(username string) (ableLogin bool, remaindingTime int) {
