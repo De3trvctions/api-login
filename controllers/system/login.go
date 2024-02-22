@@ -1,7 +1,9 @@
 package system
 
 import (
+	"api-login/config"
 	"api-login/consts"
+	"api-login/jwt"
 	"api-login/models"
 	"api-login/models/dto"
 	"api-login/redis"
@@ -14,6 +16,7 @@ import (
 	"time"
 
 	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 )
 
 type LoginController struct {
@@ -24,8 +27,12 @@ type LoginController struct {
 //
 //	@Title			登陆
 //	@Description	登陆
-//	@Success		200	"success"
-//	@router			/login [get]
+//	@Success		200			"success"
+//	@Param			Username	formData	string	true	登陆名
+//	@Param			Password	formData	string	true	用户密码
+//	@Param			DeviceId	formData	string	false	设备号
+//	@Param			IP			formData	string	false	IP地址
+//	@router			/login [post]
 func (ctl *LoginController) Login() {
 	req := dto.ReqLogin{}
 	if err := ctl.ParseForm(&req); err != nil {
@@ -59,13 +66,17 @@ func (ctl *LoginController) Login() {
 	hash := md5.Sum([]byte(req.Password))
 	hashPassword := hex.EncodeToString(hash[:])
 	if hashPassword != acc.Password {
+		ctl.setRedisLoginFail(req.Username)
 		logs.Error("[LoginController][Login] Password not match. req: %s", hashPassword)
 		ctl.Error(consts.PASSWORD_NOT_MATCH)
 	}
 
 	// TODO Generate JWT Token and return
 
-	ctl.Success("Success")
+	token := getToken(req, acc.Id)
+
+	ctl.delRedisLoginFail(req.Username)
+	ctl.Success(web.M{"Token": token})
 }
 
 func (ctl *LoginController) getRedisLoginStatus(username string) (ableLogin bool, remaindingTime int) {
@@ -106,4 +117,35 @@ func (ctl *LoginController) delRedisLoginFail(username string) {
 	_, _ = redis.Del(fmt.Sprintf(consts.FailLoginCount, username))
 	_, _ = redis.Del(fmt.Sprintf(consts.FailLoginAccountLock, username))
 	_, _ = redis.Del(fmt.Sprintf(consts.FailLoginAccountLockTime, username))
+}
+
+func getToken(req dto.ReqLogin, id int64) (token string) {
+	// tokenSalt, _ := web.AppConfig.String("TokenSalt")
+	// tokenExpMinute, _ := web.AppConfig.Int("TokenExpMinute")
+	delToken(req.Username)
+	token = jwt.Gen(web.M{
+		"Username": req.Username,
+		"Id":       id,
+		"Ip":       req.IP,
+	}, config.TokenSalt, time.Duration(config.TokenExpMinute)*time.Minute)
+	setToken(token, req.Username)
+	return
+}
+
+func setToken(token, username string) {
+	// Set token expired as 1 days
+	_ = redis.Set(fmt.Sprintf(consts.AccountLoginByToken, token), 1, time.Duration(config.TokenExpMinute)*time.Minute)
+	_ = redis.Set(fmt.Sprintf(consts.AccountLoginByUsername, username), token, time.Duration(config.TokenExpMinute)*time.Minute)
+}
+
+func delToken(username string) {
+	ex, _ := redis.Exists(fmt.Sprintf(consts.AccountLoginByUsername, username))
+	logs.Error(ex)
+	if ex {
+		token, _ := redis.Get(fmt.Sprintf(consts.AccountLoginByUsername, username))
+		_, err1 := redis.Del(fmt.Sprintf(consts.AccountLoginByToken, token))
+		_, err2 := redis.Del(fmt.Sprintf(consts.AccountLoginByUsername, username))
+		logs.Error(err1)
+		logs.Error(err2)
+	}
 }

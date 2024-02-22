@@ -6,6 +6,7 @@ require github.com/beego/beego/v2 v2.1.6
 
 require (
 	github.com/beego/i18n v0.0.0-20161101132742-e9308947f407
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/smartystreets/goconvey v1.8.1
