@@ -6,6 +6,7 @@ import (
 	"api-login/jwt"
 	"api-login/models"
 	"api-login/models/dto"
+	"api-login/nets"
 	"api-login/redis"
 	"api-login/utility"
 	"api-login/validation"
@@ -72,6 +73,7 @@ func (ctl *LoginController) Login() {
 	}
 
 	// Generate JWT Token and return
+	req.IP = nets.IP(ctl.Ctx.Request).String()
 	token := getToken(req, acc.Id)
 
 	ctl.delRedisLoginFail(req.Username)
@@ -122,9 +124,9 @@ func getToken(req dto.ReqLogin, id int64) (token string) {
 	// tokenExpMinute, _ := web.AppConfig.Int("TokenExpMinute")
 	delToken(req.Username)
 	token = jwt.Gen(web.M{
-		"Username": req.Username,
-		"Id":       id,
-		"Ip":       req.IP,
+		"Username":  req.Username,
+		"AccountId": id,
+		"Ip":        req.IP,
 	}, config.TokenSalt, time.Duration(config.TokenExpMinute)*time.Minute)
 	setToken(token, req.Username)
 	return

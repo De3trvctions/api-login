@@ -16,6 +16,10 @@ type InfoController struct {
 	system.BaseController
 }
 
+func (ctl *InfoController) Prepare() {
+	ctl.BaseController.Prepare()
+}
+
 // Detail
 //
 //	@Title			注册

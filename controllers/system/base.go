@@ -1,7 +1,9 @@
 package system
 
 import (
+	"api-login/config"
 	"api-login/consts"
+	"api-login/jwt"
 	"fmt"
 
 	"github.com/beego/beego/v2/server/web"
@@ -11,12 +13,14 @@ import (
 type BaseController struct {
 	web.Controller
 	i18n.Locale
-	Code     int64
-	Result   interface{}
-	Ip       string
-	DeviceId string
-	Msg      string
-	Token    string
+	Code      int64
+	Result    interface{}
+	Ip        string
+	DeviceId  string
+	Msg       string
+	Token     string
+	AccountId int64
+	Username  string
 }
 
 func (ctl *BaseController) Success(obj interface{}) {
@@ -51,4 +55,40 @@ func (ctl *BaseController) GetLanguage() {
 	if len(ctl.Lang) == 0 {
 		ctl.Lang = "zh-CN"
 	}
+}
+
+func (ctl *BaseController) Prepare() {
+	ctl.CheckLogin()
+}
+
+func (ctl *BaseController) CheckLogin() {
+	loginToken := ctl.GetUserFromToken()
+
+	ctl.AccountId = loginToken.AccountId
+	ctl.Username = loginToken.UserName
+
+}
+
+func (ctl *BaseController) GetUserFromToken() (loginToken LoginToken) {
+	token := ctl.Ctx.Input.Header("Token")
+
+	tokenMap := jwt.Parse(token, config.TokenSalt)
+	accountId := tokenMap["AccountId"]
+	username := tokenMap["UserName"]
+	ip := tokenMap["Ip"]
+	loginToken = LoginToken{
+		AccountId: accountId.(int64),
+		UserName:  username.(string),
+		Ip:        ip.(string),
+		Token:     token,
+	}
+
+	return
+}
+
+type LoginToken struct {
+	AccountId int64
+	UserName  string
+	Ip        string
+	Token     string
 }
