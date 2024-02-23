@@ -2,6 +2,7 @@ package main
 
 import (
 	"api-login/config"
+	"api-login/filter"
 	_ "api-login/routers"
 	"api-login/validation"
 	"fmt"
@@ -30,5 +31,8 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin"},
 		AllowCredentials: true,
 	}), web.WithReturnOnOutput(false))
+
+	web.InsertFilter("/user/*", web.BeforeRouter, filter.LoginManager)
+
 	web.Run(fmt.Sprintf(":%d", config.HttpPort))
 }

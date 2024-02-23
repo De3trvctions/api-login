@@ -32,15 +32,15 @@ type LoginController struct {
 //	@Param			Password	formData	string	true	用户密码
 //	@Param			DeviceId	formData	string	false	设备号
 //	@Param			IP			formData	string	false	IP地址
-//	@router			/login [post]
+//	@router			/ [post]
 func (ctl *LoginController) Login() {
 	req := dto.ReqLogin{}
 	if err := ctl.ParseForm(&req); err != nil {
-		logs.Error("[Login] Parse Form Error", err)
+		logs.Error("[LoginController][Login] Parse Form Error", err)
 		ctl.Error(consts.FAILED_REQUEST)
 	}
 	if err := validation.ValidateRequest(&req); err != nil {
-		logs.Error("[RegisterController][Register]FormValidate fail, req : %+v, error: %+v", req, err)
+		logs.Error("[LoginController][Login]FormValidate fail, req : %+v, error: %+v", req, err)
 		ctl.Error(consts.PARAM_ERROR)
 	}
 
@@ -71,18 +71,16 @@ func (ctl *LoginController) Login() {
 		ctl.Error(consts.PASSWORD_NOT_MATCH)
 	}
 
-	// TODO Generate JWT Token and return
-
+	// Generate JWT Token and return
 	token := getToken(req, acc.Id)
 
 	ctl.delRedisLoginFail(req.Username)
-	ctl.Success(web.M{"Token": token})
+	ctl.Success(web.M{"Token": token, "Username": acc.Username})
 }
 
 func (ctl *LoginController) getRedisLoginStatus(username string) (ableLogin bool, remaindingTime int) {
 	ableLogin = true
 	ex1, _ := redis.Exists(fmt.Sprintf(consts.FailLoginAccountLock, username))
-	// ex2, _ := redis.Exists(fmt.Sprintf(consts.FailLoginAccountLockTime, username))
 
 	if ex1 {
 		ableLogin = false
@@ -134,7 +132,7 @@ func getToken(req dto.ReqLogin, id int64) (token string) {
 
 func setToken(token, username string) {
 	// Set token expired as 1 days
-	_ = redis.Set(fmt.Sprintf(consts.AccountLoginByToken, token), 1, time.Duration(config.TokenExpMinute)*time.Minute)
+	_ = redis.Set(fmt.Sprintf(consts.AccountLoginByToken, token), username, time.Duration(config.TokenExpMinute)*time.Minute)
 	_ = redis.Set(fmt.Sprintf(consts.AccountLoginByUsername, username), token, time.Duration(config.TokenExpMinute)*time.Minute)
 }
 
@@ -145,7 +143,11 @@ func delToken(username string) {
 		token, _ := redis.Get(fmt.Sprintf(consts.AccountLoginByUsername, username))
 		_, err1 := redis.Del(fmt.Sprintf(consts.AccountLoginByToken, token))
 		_, err2 := redis.Del(fmt.Sprintf(consts.AccountLoginByUsername, username))
-		logs.Error(err1)
-		logs.Error(err2)
+		if err1 != nil {
+			logs.Error("[delToken] Error 1: ", err1)
+		}
+		if err2 != nil {
+			logs.Error("[delToken] Error 2: ", err2)
+		}
 	}
 }
