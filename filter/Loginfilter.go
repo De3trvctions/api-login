@@ -22,41 +22,38 @@ var LoginManager = func(ctx *context.Context) {
 		requestUrl = requestUrl[0:charIndex]
 	}
 
-	logs.Error(requestUrl)
-	fmt.Println(requestUrl)
-
 	// if requestUrl == "/system/user/login" {
 	// 	// 不做拦截处理
 	// 	return
 	// }
 
 	if len(token) == 0 {
-		logs.Info("[LoginFilter]Token Empty not login[Url](%s) [Token](%s)", requestUrl, token)
+		logs.Error("[LoginFilter]Token Empty not login[Url](%s) [Token](%s)", requestUrl, token)
 		goto NoLogin
 	} else {
 		tokenMap := jwt.Parse(token, config.TokenSalt)
 		//logs.Debug("[LoginFilter]FromToken", token, config.TokenSalt, tokenMap)
 		if tokenMap == nil {
-			fmt.Printf("[LoginFilter]FromToken Failed Not Login[Url](%s) [Token](%s)", requestUrl, token)
+			logs.Error("[LoginFilter]FromToken Failed Not Login[Url](%s) [Token](%s)", requestUrl, token)
 			goto NoLogin
 		}
 
 		// 获取对应的用户信息
-		accountId, exist := tokenMap["Id"]
+		accountId, exist := tokenMap["AccountId"]
 		if !exist || accountId == nil {
-			fmt.Printf("[LoginFilter]Get admin Id Failed Not Login[Url](%s) [Token](%s)", requestUrl, token)
+			logs.Error("[LoginFilter]Get admin Id Failed Not Login[Url](%s) [Token](%s)", requestUrl, token)
 			goto NoLogin
 		}
 
 		// 超过最长登陆时间，需要重新登陆
 		username, err := redis.Get(fmt.Sprintf(consts.AccountLoginByToken, token))
 		if err != nil || len(username) == 0 {
-			fmt.Printf("[LoginFilter]Token Not exist %v, %v", requestUrl, accountId)
+			logs.Error("[LoginFilter]Token Not exist %v, %v", requestUrl, accountId)
 			goto NoLogin
 		} else {
 			redisToken, err := redis.Get(fmt.Sprintf(consts.AccountLoginByUsername, username))
 			if err != nil || len(redisToken) == 0 {
-				fmt.Printf("[LoginFilter]Username Not exist %v, %v", requestUrl, username)
+				logs.Error("[LoginFilter]Username Not exist %v, %v", requestUrl, username)
 				goto NoLogin
 			} else {
 				if redisToken != token {

@@ -5,7 +5,6 @@ import (
 	"api-login/controllers/system"
 	"api-login/models"
 	"api-login/models/dto"
-	"api-login/utility"
 	"api-login/validation"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -13,11 +12,11 @@ import (
 )
 
 type InfoController struct {
-	system.BaseController
+	system.PermissionController
 }
 
 func (ctl *InfoController) Prepare() {
-	ctl.BaseController.Prepare()
+	ctl.PermissionController.Prepare()
 }
 
 // Detail
@@ -28,6 +27,7 @@ func (ctl *InfoController) Prepare() {
 //	@Param			AccountId	formData	string	true	登陆名
 //	@router			/detail [get]
 func (ctl *InfoController) Detail() {
+	defer logs.Info("[InfoController][Detail]: Enter URL %+v", ctl.RequestUrl)
 	req := dto.ReqAccountDetail{}
 	if err := ctl.ParseForm(&req); err != nil {
 		logs.Error("[Login] Parse Form Error", err)
@@ -39,25 +39,40 @@ func (ctl *InfoController) Detail() {
 	}
 
 	acc := models.Account{}
-	acc.Id = req.AccountId
-	db := utility.NewDB()
 
-	tx, err := db.Begin()
-	if err != nil {
-		logs.Error(err)
+	// Method 1
+	// acc.Id = req.AccountId
+	// db := utility.NewDB()
+
+	// err := db.Get(&acc, "Id")
+	// if err != nil {
+	// 	logs.Error("[InfoController][Detail]")
+	// }
+
+	// End Method 1
+
+	// Method 2
+	account, errCode, err := acc.SelfInfo(req)
+	if err != nil || errCode != 0 {
+		if errCode == 0 {
+			errCode = consts.OPERATION_FAILED
+		}
+		logs.Error("[RegisterController][Register]Db error:", err)
+		ctl.Error(errCode)
 	}
-	defer tx.Commit()
 
-	err = db.Get(&acc, "Id")
-	if err != nil {
-		logs.Error("[InfoController][Detail]")
-	}
+	// tx, err := db.Begin()
+	// if err != nil {
+	// 	logs.Error(err)
+	// }
+	// defer tx.Commit()
 
-	acc.SetUpdateTime()
-	_, err = tx.Update(&acc, "UpdateTime")
-	if err != nil {
-		logs.Error("[InfoController][Detail]Update Error:", err)
-	}
+	// acc.SetUpdateTime()
+	// _, err = tx.Update(&acc, "UpdateTime")
+	// if err != nil {
+	// 	logs.Error("[InfoController][Detail]Update Error:", err)
+	// }
 
-	ctl.Success(web.M{"Info": acc})
+	// ctl.Success(web.M{"Info": acc}) // -> Method 1
+	ctl.Success(web.M{"Info": account})
 }

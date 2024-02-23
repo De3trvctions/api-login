@@ -5,6 +5,7 @@ import (
 	"api-login/consts"
 	"api-login/jwt"
 	"fmt"
+	"strings"
 
 	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/i18n"
@@ -13,14 +14,19 @@ import (
 type BaseController struct {
 	web.Controller
 	i18n.Locale
-	Code      int64
-	Result    interface{}
-	Ip        string
-	DeviceId  string
-	Msg       string
-	Token     string
-	AccountId int64
-	Username  string
+	Code       int64
+	Result     interface{}
+	Ip         string
+	DeviceId   string
+	Msg        string
+	Token      string
+	AccountId  int64
+	Username   string
+	RequestUrl string
+}
+
+func (ctl *BaseController) Prepare() {
+
 }
 
 func (ctl *BaseController) Success(obj interface{}) {
@@ -57,29 +63,39 @@ func (ctl *BaseController) GetLanguage() {
 	}
 }
 
-func (ctl *BaseController) Prepare() {
+type PermissionController struct {
+	BaseController
+}
+
+func (ctl *PermissionController) Prepare() {
 	ctl.CheckLogin()
 }
 
-func (ctl *BaseController) CheckLogin() {
+func (ctl *PermissionController) CheckLogin() {
 	loginToken := ctl.GetUserFromToken()
 
 	ctl.AccountId = loginToken.AccountId
 	ctl.Username = loginToken.UserName
+	requestUrl := ctl.Ctx.Request.URL.String()
+	charIndex := strings.Index(requestUrl, "?")
+	if charIndex >= 0 {
+		requestUrl = requestUrl[0:charIndex]
+	}
+	ctl.RequestUrl = requestUrl
 
 }
 
-func (ctl *BaseController) GetUserFromToken() (loginToken LoginToken) {
+func (ctl *PermissionController) GetUserFromToken() (loginToken LoginToken) {
 	token := ctl.Ctx.Input.Header("Token")
 
 	tokenMap := jwt.Parse(token, config.TokenSalt)
-	accountId := tokenMap["AccountId"]
-	username := tokenMap["UserName"]
-	ip := tokenMap["Ip"]
+	accountId, _ := tokenMap["AccountId"].(float64)
+	username, _ := tokenMap["UserName"].(string)
+	ip, _ := tokenMap["Ip"].(string)
 	loginToken = LoginToken{
-		AccountId: accountId.(int64),
-		UserName:  username.(string),
-		Ip:        ip.(string),
+		AccountId: int64(accountId),
+		UserName:  username,
+		Ip:        ip,
 		Token:     token,
 	}
 

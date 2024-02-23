@@ -140,7 +140,6 @@ func setToken(token, username string) {
 
 func delToken(username string) {
 	ex, _ := redis.Exists(fmt.Sprintf(consts.AccountLoginByUsername, username))
-	logs.Error(ex)
 	if ex {
 		token, _ := redis.Get(fmt.Sprintf(consts.AccountLoginByUsername, username))
 		_, err1 := redis.Del(fmt.Sprintf(consts.AccountLoginByToken, token))

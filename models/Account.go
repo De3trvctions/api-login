@@ -20,6 +20,12 @@ type Account struct {
 	Email    string `orm:"description(邮件)"`
 }
 
+type AccountInfo struct {
+	CommStruct
+	Username string
+	Email    string
+}
+
 func (acc *Account) SetUpdateTime() {
 	acc.UpdateTime = uint64(time.Now().Unix())
 }
@@ -41,7 +47,7 @@ func (acc *Account) SetHashPassword(password string) {
 	acc.Password = hex.EncodeToString(hash[:])
 }
 
-func (acc *Account) List(req Account) (accountList []Account, errCode int, err error) {
+func (acc *Account) List(req Account) (accountList []AccountInfo, errCode int, err error) {
 	qb, _ := orm.NewQueryBuilder("mysql")
 	db := utility.NewDB()
 
@@ -50,7 +56,6 @@ func (acc *Account) List(req Account) (accountList []Account, errCode int, err e
 	qb.Where("1=1")
 	var args []interface{}
 
-	req.Id = 1
 	if req.Id > 0 {
 		qb.And("id = ?")
 		args = append(args, req.Id)
@@ -75,6 +80,46 @@ func (acc *Account) List(req Account) (accountList []Account, errCode int, err e
 	_, err = db.Raw(sql).SetArgs(args).QueryRows(&accountList)
 	if err != nil {
 		logs.Error("[Account][List] Query error:", sql, args, err)
+	}
+
+	return
+}
+
+func (acc *Account) SelfInfo(req dto.ReqAccountDetail) (account AccountInfo, errCode int64, err error) {
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qbWhere, _ := orm.NewQueryBuilder("mysql")
+	var args []interface{}
+	db := utility.NewDB()
+
+	qb.Select("*")
+	qb.From(acc.TableName())
+	qbWhere.Where("1=1")
+
+	if req.AccountId > 0 {
+		qbWhere.And("id = ?")
+		args = append(args, req.AccountId)
+	}
+
+	if req.Username != "" {
+		qbWhere.And("username = ?")
+		args = append(args, req.Username)
+	}
+
+	if req.CreateTime > 0 {
+		qbWhere.And("create_time > ?")
+		args = append(args, req.CreateTime)
+	}
+
+	if req.Email != "" {
+		qbWhere.And("email > ?")
+		args = append(args, req.Email)
+	}
+
+	sql := qb.String() + " " + qbWhere.String()
+	err = db.Raw(sql).SetArgs(args).QueryRow(&account)
+	if err != nil {
+		errCode = consts.DB_GET_FAILED
+		logs.Error("[Account][SelfInfo] Query error:", sql, args, err)
 	}
 
 	return
