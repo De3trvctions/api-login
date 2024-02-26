@@ -47,6 +47,11 @@ func (acc *Account) SetHashPassword(password string) {
 	acc.Password = hex.EncodeToString(hash[:])
 }
 
+func (acc *Account) GetHashPassword(password string) (hashPassword string) {
+	hash := md5.Sum([]byte(password))
+	return hex.EncodeToString(hash[:])
+}
+
 func (acc *Account) List(req Account) (accountList []AccountInfo, errCode int, err error) {
 	qb, _ := orm.NewQueryBuilder("mysql")
 	db := utility.NewDB()
@@ -85,7 +90,7 @@ func (acc *Account) List(req Account) (accountList []AccountInfo, errCode int, e
 	return
 }
 
-func (acc *Account) SelfInfo(req dto.ReqAccountDetail) (account AccountInfo, errCode int64, err error) {
+func (acc *Account) Info(req dto.ReqAccountDetail) (account AccountInfo, errCode int64, err error) {
 	qb, _ := orm.NewQueryBuilder("mysql")
 	qbWhere, _ := orm.NewQueryBuilder("mysql")
 	var args []interface{}
@@ -125,6 +130,27 @@ func (acc *Account) SelfInfo(req dto.ReqAccountDetail) (account AccountInfo, err
 	return
 }
 
+func (acc *Account) SelfInfo() (account AccountInfo, errCode int64, err error) {
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qbWhere, _ := orm.NewQueryBuilder("mysql")
+	var args []interface{}
+	db := utility.NewDB()
+
+	qb.Select("*")
+	qb.From(acc.TableName())
+	qbWhere.Where("id = ?")
+	args = append(args, acc.Id)
+
+	sql := qb.String() + " " + qbWhere.String()
+	err = db.Raw(sql).SetArgs(args).QueryRow(&account)
+	if err != nil {
+		errCode = consts.DB_GET_FAILED
+		logs.Error("[Account][SelfInfo] Query error:", sql, args, err)
+	}
+
+	return
+}
+
 func (acc *Account) Register(req dto.ReqRegister) (errCode int64, err error) {
 	// Check if username Exist
 	db := utility.NewDB()
@@ -153,6 +179,44 @@ func (acc *Account) Register(req dto.ReqRegister) (errCode int64, err error) {
 	if err != nil {
 		errCode = consts.DB_INSERT_FAILED
 		logs.Error("[Account][Register] Insert Account error", err)
+		return
+	}
+
+	return
+}
+
+func (acc *Account) Edit(req dto.ReqEditAccount) (errCode int64, err error) {
+	db := utility.NewDB()
+	if acc.Id > 0 {
+		err = db.Get(acc, "Id")
+		if err != nil {
+			logs.Error("[Account][Edit] Get account error", err)
+			errCode = consts.DB_GET_FAILED
+			return
+		}
+	} else {
+		logs.Error("[Account][Edit] No Account Id")
+		errCode = consts.ACCOUNT_ID_INVALID
+		return
+	}
+
+	var updateField []string
+
+	if req.Email != acc.Email {
+		acc.Email = req.Email
+		updateField = append(updateField, "Email")
+	}
+
+	hashPassword := acc.GetHashPassword(req.NewPassword)
+	if hashPassword != acc.Password {
+		acc.Password = hashPassword
+		updateField = append(updateField, "Password")
+	}
+
+	_, err = db.Update(acc, updateField...)
+	if err != nil {
+		logs.Error("[Account][Edit] Update account error. %+v , error: %+v", acc, err)
+		errCode = consts.DB_UPDATE_FAILED
 		return
 	}
 

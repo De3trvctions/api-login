@@ -24,7 +24,7 @@ func (ctl *InfoController) Prepare() {
 //	@Title			注册
 //	@Description	注册
 //	@Success		200	{object}	web.M
-//	@Param			AccountId	formData	string	true	登陆名
+//	@Param			AccountId	query	string	true	登陆名
 //	@router			/detail [get]
 func (ctl *InfoController) Detail() {
 	defer logs.Info("[InfoController][Detail]: Enter URL %+v", ctl.RequestUrl)
@@ -39,7 +39,7 @@ func (ctl *InfoController) Detail() {
 	}
 
 	acc := models.Account{}
-
+	req.AccountId = ctl.AccountId
 	// Method 1
 	// acc.Id = req.AccountId
 	// db := utility.NewDB()
@@ -52,7 +52,7 @@ func (ctl *InfoController) Detail() {
 	// End Method 1
 
 	// Method 2
-	account, errCode, err := acc.SelfInfo(req)
+	account, errCode, err := acc.SelfInfo()
 	if err != nil || errCode != 0 {
 		if errCode == 0 {
 			errCode = consts.OPERATION_FAILED
@@ -75,4 +75,39 @@ func (ctl *InfoController) Detail() {
 
 	// ctl.Success(web.M{"Info": acc}) // -> Method 1
 	ctl.Success(web.M{"Info": account})
+}
+
+// Detail
+//
+//	@Title			编辑
+//	@Description	编辑
+//	@Success		200	{object}	web.M
+//	@Param			AccountId	formData	string	true	登陆ID
+//	@Param			Email		formData	string	true	登陆名
+//	@Param			Password	formData	string	true	登陆名
+//	@Param			NewPassword	formData	string	true	登陆名
+//	@router			/ [put]
+func (ctl *InfoController) Edit() {
+	req := dto.ReqEditAccount{}
+	if err := ctl.ParseForm(&req); err != nil {
+		logs.Error("[InfoController][Edit] Parse Form Error", err)
+		ctl.Error(consts.FAILED_REQUEST)
+	}
+	if err := validation.ValidateRequest(&req); err != nil {
+		logs.Error("[InfoController][Edit]FormValidate fail, req : %+v, error: %+v", req, err)
+		ctl.Error(consts.PARAM_ERROR)
+	}
+
+	acc := models.Account{}
+	acc.Id = req.AccountId
+	errCode, err := acc.Edit(req)
+	if err != nil || errCode != 0 {
+		if errCode == 0 {
+			errCode = consts.OPERATION_FAILED
+		}
+		logs.Error("[InfoController][Edit]Db error:", err)
+		ctl.Error(errCode)
+	}
+
+	ctl.Success("success")
 }
