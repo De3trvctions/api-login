@@ -1,9 +1,11 @@
 package config
 
 import (
+	"api-login/mail"
 	"api-login/utility"
+	"encoding/json"
 
-	"github.com/beego/beego/v2/core/config/env"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 )
 
@@ -12,11 +14,26 @@ var (
 	TokenSalt         string
 	TokenExpMinute    int64
 	TokenMaxExpSecond int64
+	Mail              []*mail.Option
 )
 
 func init() {
-	HttpPort = utility.StringToInt64(env.Get("HttpPort", web.AppConfig.DefaultString("HttpPort", "8080")))
-	TokenSalt = env.Get("TokenSalt", "")
-	TokenExpMinute = utility.StringToInt64(env.Get("TokenExpMinute", "1440"))
-	TokenMaxExpSecond = utility.StringToInt64(env.Get("TokenMaxExpSecond", "86400"))
+	HttpPort = utility.StringToInt64(getValue("HttpPort"))
+	TokenSalt = getValue("TokenSalt")
+	TokenExpMinute = utility.StringToInt64(getValue("TokenExpMinute"))
+	TokenMaxExpSecond = utility.StringToInt64(getValue("TokenMaxExpSecond"))
+	err := json.Unmarshal([]byte(getValue("AppPassword")), &Mail)
+	if err != nil {
+		logs.Error("Error:", err)
+		return
+	}
+}
+
+func getValue(key string) string {
+	value, err := web.AppConfig.String(key)
+	if err != nil {
+		logs.Error("[Conf][getValue]Error", err)
+		return ""
+	}
+	return value
 }

@@ -17,6 +17,7 @@ func main() {
 	config.InitRedis()
 	config.InitDB()
 	config.InitLanguage()
+	config.InitMail()
 	validation.Init()
 
 	// redisKey := "mykey"

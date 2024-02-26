@@ -2,6 +2,7 @@ package config
 
 import (
 	"api-login/db"
+	"api-login/mail"
 	"api-login/redis"
 	"strings"
 
@@ -40,4 +41,13 @@ func InitLanguage() {
 		}
 	}
 	logs.Info("[InitLanguage] Init Language Success")
+}
+
+func InitMail(option ...*mail.Option) {
+	if len(option) >= 1 {
+		logs.Error("1")
+		mail.New(option...)
+	} else {
+		mail.New(Mail...)
+	}
 }
