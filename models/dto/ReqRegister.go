@@ -1,7 +1,8 @@
 package dto
 
 type ReqRegister struct {
-	Username string `valid:"IsUsername"`
-	Password string
-	Email    string `valid:"Email"`
+	Username  string `valid:"Required;IsUsername"`
+	Password  string `valid:"Required"`
+	Email     string `valid:"Required;Email"`
+	ValidCode string `valid:"Required"`
 }

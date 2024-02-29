@@ -17,6 +17,7 @@ func init() {
 	systemNs := web.NewNamespace("/system",
 		web.NSNamespace("/login", web.NSInclude(&system.LoginController{})),
 		web.NSNamespace("/register", web.NSInclude(&system.RegisterController{})),
+		web.NSNamespace("/code", web.NSInclude(&system.CodeController{})),
 	)
 	web.AddNamespace(systemNs)
 

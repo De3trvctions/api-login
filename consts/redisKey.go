@@ -7,4 +7,7 @@ const (
 
 	AccountLoginByToken    = "AccountLoginByToken:%v"
 	AccountLoginByUsername = "AccountLoginByUsername:%v"
+
+	RegisterEmailValidCode     = "RegisterEmailValidCode:%s"
+	RegisterEmailValidCodeLock = "RegisterEmailValidCodeLock:%v"
 )

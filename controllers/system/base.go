@@ -46,6 +46,11 @@ func (ctl *BaseController) Error(code int64, msg ...string) {
 	if ctl.Code > 0 {
 		ctl.Msg = ctl.Tr("error." + fmt.Sprintf("%d", ctl.Code))
 	}
+
+	if len(msg) > 0 {
+		ctl.Msg += "(" + fmt.Sprint(msg) + ")"
+	}
+
 	ctl.TraceJson(true)
 }
 

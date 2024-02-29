@@ -10,11 +10,12 @@ import (
 )
 
 var (
-	HttpPort          int64
-	TokenSalt         string
-	TokenExpMinute    int64
-	TokenMaxExpSecond int64
-	Mail              []*mail.Option
+	HttpPort           int64
+	TokenSalt          string
+	TokenExpMinute     int64
+	TokenMaxExpSecond  int64
+	Mail               []*mail.Option
+	ValidCodeExpMinute int64
 )
 
 func init() {
@@ -27,6 +28,7 @@ func init() {
 		logs.Error("Error:", err)
 		return
 	}
+	ValidCodeExpMinute = utility.StringToInt64(getValue("ValidCodeExpMinute"))
 }
 
 func getValue(key string) string {
