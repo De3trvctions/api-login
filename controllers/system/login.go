@@ -58,7 +58,7 @@ func (ctl *LoginController) Login() {
 	acc.Username = req.Username
 
 	db := utility.NewDB()
-	err := db.Get(&acc, "username")
+	err := db.Get(&acc, "Username")
 	if err != nil {
 		logs.Error("[LoginController][Login] Account not found", err)
 		ctl.Error(consts.USERNAME_NOT_FOUND)

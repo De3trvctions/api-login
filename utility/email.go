@@ -12,7 +12,7 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 )
 
-func SendMail(addr string, expTime int64) (code string, timeInterval int64, errCode int64, err error) {
+func SendMail(addr, title, msg string, expTime int64) (code string, timeInterval int64, errCode int64, err error) {
 	code = GetRandomNumber(6)
 	timenow := int64(0)
 	ex, _ := redis.Exists(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr))
@@ -36,7 +36,7 @@ func SendMail(addr string, expTime int64) (code string, timeInterval int64, errC
 		return "", 0, errCode, nil
 	}
 
-	message := generateValidCodeEmailTemplate(addr, "Email Validation Code", "", code)
+	message := generateValidCodeEmailTemplate(addr, title, msg, code)
 	cli := mail.Cli()
 	err = cli.Send(cli.Address(), []string{addr}, []byte(message))
 	if err != nil {
