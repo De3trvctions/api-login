@@ -23,8 +23,8 @@ func (ctl *InfoController) Prepare() {
 //
 //	@Title			注册
 //	@Description	注册
-//	@Success		200	{object}	web.M
-//	@Param			AccountId	query	string	true	登陆名
+//	@Success		200			{object}	web.M
+//	@Param			AccountId	query		string	true	登陆名
 //	@router			/detail [get]
 func (ctl *InfoController) Detail() {
 	defer logs.Info("[InfoController][Detail]: Enter URL %+v", ctl.RequestUrl)
@@ -81,7 +81,7 @@ func (ctl *InfoController) Detail() {
 //
 //	@Title			编辑
 //	@Description	编辑
-//	@Success		200	{object}	web.M
+//	@Success		200			{object}	web.M
 //	@Param			AccountId	formData	string	true	登陆ID
 //	@Param			Email		formData	string	true	登陆名
 //	@Param			Password	formData	string	true	登陆名

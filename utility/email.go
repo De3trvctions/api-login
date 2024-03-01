@@ -12,24 +12,24 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 )
 
-func SendMail(addr, title, msg string, expTime int64) (code string, timeInterval int64, errCode int64, err error) {
+func SendMail(redisKey, redisKeyLock, addr, title, msg string, expTime int64) (code string, timeInterval int64, errCode int64, err error) {
 	code = GetRandomNumber(6)
 	timenow := int64(0)
-	ex, _ := redis.Exists(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr))
+	ex, _ := redis.Exists(fmt.Sprintf(redisKeyLock, addr))
 	if ex {
-		returnTime, _ := redis.Get(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr))
+		returnTime, _ := redis.Get(fmt.Sprintf(redisKeyLock, addr))
 		errCode = consts.VALID_CODE_EXIST
 		timeInterval = StringToInt64(returnTime)
 		return "", timeInterval, errCode, nil
 	}
 
-	err = redis.Set(fmt.Sprintf(consts.RegisterEmailValidCode, addr), code, time.Duration(expTime)*time.Minute)
+	err = redis.Set(fmt.Sprintf(redisKey, addr), code, time.Duration(expTime)*time.Minute)
 	if err != nil {
 		logs.Error(err)
 	}
 
 	timenow = time.Now().Add(30 * time.Second).Unix()
-	if err := redis.Set(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr), timenow, time.Duration(30)*time.Second); err != nil {
+	if err := redis.Set(fmt.Sprintf(redisKeyLock, addr), timenow, time.Duration(30)*time.Second); err != nil {
 		logs.Error("[SendMail]Set Redis Key RegisterEmailValidCodeLock Error:", err, addr)
 		errCode = consts.VALID_CODE_COOL_DOWN
 
@@ -101,5 +101,5 @@ func generateValidCodeEmailTemplate(addr, title, msg, code string) (res string) 
 }
 
 func DelEmailValidCodeLock(addr string) {
-	_, _ = redis.Del(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr))
+	_, _ = redis.Del(fmt.Sprintf(consts.RegisterEmailValidCode, addr))
 }

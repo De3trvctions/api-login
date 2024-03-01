@@ -20,7 +20,8 @@ type CodeController struct {
 //
 //	@Title			忘记密码获取邮件验证码
 //	@Description	忘记密码获取邮件验证码
-//	@Success		200			{string}	"success"
+//	@Success		200		{string}	"success"
+//	@Param			Email	formData	string	true	Email
 //	@router			/getvalidcode [get]
 func (ctl *CodeController) GetValidCode() {
 	type reqGetCode struct {
@@ -36,7 +37,7 @@ func (ctl *CodeController) GetValidCode() {
 		ctl.Error(consts.PARAM_ERROR)
 	}
 
-	code, timeLeft, errCode, err := utility.SendMail(req.Email, "Email Validation Code", "", config.ValidCodeExpMinute)
+	code, timeLeft, errCode, err := utility.SendMail(consts.RegisterEmailValidCode, consts.RegisterEmailValidCodeLock, req.Email, "Email Validation Code", "", config.ValidCodeExpMinute)
 	if err != nil || errCode != 0 || timeLeft > 0 {
 		if errCode == 0 {
 			errCode = consts.OPERATION_FAILED
@@ -61,5 +62,4 @@ func (ctl *CodeController) GetValidCode() {
 	} else {
 		ctl.Success("success")
 	}
-
 }

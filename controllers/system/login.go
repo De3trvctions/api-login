@@ -29,7 +29,7 @@ type LoginController struct {
 //	@Title			登陆
 //	@Description	登陆
 //	@Success		200			"success"
-//	@Param			Username	formData	string	true	登陆名
+//	@Param			Username	formData	string	true	账号
 //	@Param			Password	formData	string	true	用户密码
 //	@Param			DeviceId	formData	string	false	设备号
 //	@Param			IP			formData	string	false	IP地址

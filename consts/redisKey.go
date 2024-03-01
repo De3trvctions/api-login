@@ -8,6 +8,8 @@ const (
 	AccountLoginByToken    = "AccountLoginByToken:%v"
 	AccountLoginByUsername = "AccountLoginByUsername:%v"
 
-	RegisterEmailValidCode     = "RegisterEmailValidCode:%s"
-	RegisterEmailValidCodeLock = "RegisterEmailValidCodeLock:%v"
+	RegisterEmailValidCode           = "RegisterEmailValidCode:%s"
+	RegisterEmailValidCodeLock       = "RegisterEmailValidCodeLock:%v"
+	ForgetPasswordEmailValidCode     = "ForgetPasswordEmailValidCode:%s"
+	ForgetPasswordEmailValidCodeLock = "ForgetPasswordEmailValidCodeLock:%v"
 )

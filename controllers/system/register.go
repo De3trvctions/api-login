@@ -20,7 +20,11 @@ type RegisterController struct {
 //
 //	@Title			注册
 //	@Description	注册
-//	@Success		200	{object}	models.Account
+//	@Param			Username	formData	string	true	账号
+//	@Param			Password	formData	string	true	密码
+//	@Param			Email		formData	string	true	邮箱
+//	@Param			ValidCode	formData	string	true	验证码
+//	@Success		200			string		"success"
 //	@router			/ [post]
 func (ctl *RegisterController) Register() {
 	req := dto.ReqRegister{}
@@ -42,6 +46,8 @@ func (ctl *RegisterController) Register() {
 			logs.Error("[RegisterController][Register] Valid Code not match. Please try again")
 			ctl.Error(consts.VALID_CODE_NOT_MATCH)
 		}
+	} else {
+		ctl.Error(consts.VALID_CODE_NOT_MATCH)
 	}
 
 	acc := models.Account{}
@@ -55,5 +61,4 @@ func (ctl *RegisterController) Register() {
 	}
 
 	ctl.Success("success")
-	//ctl.Success(web.M{"Items": data, "Pagination": pagination})
 }
