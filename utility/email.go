@@ -12,13 +12,37 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 )
 
-func Send(addr, title, msg, code string) (err error) {
-	message := generateValidCodeEmailTemplate(addr, title, msg, code)
+func SendMail(addr string, expTime int64) (code string, timeInterval int64, errCode int64, err error) {
+	code = GetRandomNumber(6)
+	timenow := int64(0)
+	ex, _ := redis.Exists(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr))
+	if ex {
+		returnTime, _ := redis.Get(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr))
+		errCode = consts.VALID_CODE_EXIST
+		timeInterval = StringToInt64(returnTime)
+		return "", timeInterval, errCode, nil
+	}
+
+	err = redis.Set(fmt.Sprintf(consts.RegisterEmailValidCode, addr), code, time.Duration(expTime)*time.Minute)
+	if err != nil {
+		logs.Error(err)
+	}
+
+	timenow = time.Now().Add(30 * time.Second).Unix()
+	if err := redis.Set(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr), timenow, time.Duration(30)*time.Second); err != nil {
+		logs.Error("[SendMail]Set Redis Key RegisterEmailValidCodeLock Error:", err, addr)
+		errCode = consts.VALID_CODE_COOL_DOWN
+
+		return "", 0, errCode, nil
+	}
+
+	message := generateValidCodeEmailTemplate(addr, "Email Validation Code", "", code)
 	cli := mail.Cli()
 	err = cli.Send(cli.Address(), []string{addr}, []byte(message))
 	if err != nil {
-		logs.Error("[EmailValidCode][Get] Send email error", err)
-		return err
+		logs.Error("[SendMail] Send email error", err)
+		DelEmailValidCodeLock(addr)
+		return "", 0, 0, err
 	}
 	return
 }
@@ -76,36 +100,6 @@ func generateValidCodeEmailTemplate(addr, title, msg, code string) (res string) 
 	return
 }
 
-func SendMail(addr string, expTime int64) (code string, timeInterval int64, errCode int64, err error) {
-	code = GetRandomNumber(6)
-	timenow := int64(0)
-	ex, _ := redis.Exists(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr))
-	if ex {
-		returnTime, _ := redis.Get(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr))
-		errCode = consts.VALID_CODE_EXIST
-		timeInterval = StringToInt64(returnTime)
-		logs.Error(err)
-		logs.Error(returnTime)
-		logs.Error(timeInterval)
-		return "", timeInterval, errCode, nil
-	}
-
-	err = redis.Set(fmt.Sprintf(consts.RegisterEmailValidCode, addr), code, time.Duration(expTime)*time.Minute)
-	if err != nil {
-		logs.Error(err)
-	}
-
-	timenow = time.Now().Add(30 * time.Second).Unix()
-	if err := redis.Set(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr), timenow, time.Duration(30)*time.Second); err != nil {
-		logs.Error("[SendMail]Set Redis Key RegisterEmailValidCodeLock Error:", err, addr)
-		errCode = consts.VALID_CODE_COOL_DOWN
-
-		return "", 0, errCode, nil
-	}
-
-	err = Send(addr, "Email Validation Code", "", code)
-	if err != nil {
-		logs.Error("[SendMail] Send error", err)
-	}
-	return
+func DelEmailValidCodeLock(addr string) {
+	_, _ = redis.Del(fmt.Sprintf(consts.RegisterEmailValidCodeLock, addr))
 }

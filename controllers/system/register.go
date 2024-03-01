@@ -4,7 +4,10 @@ import (
 	"api-login/consts"
 	"api-login/models"
 	"api-login/models/dto"
+	"api-login/redis"
+	"api-login/utility"
 	"api-login/validation"
+	"fmt"
 
 	"github.com/beego/beego/v2/core/logs"
 )
@@ -30,9 +33,18 @@ func (ctl *RegisterController) Register() {
 		ctl.Error(consts.PARAM_ERROR)
 	}
 
-	acc := models.Account{}
-	_, _, _ = acc.List(acc)
+	// Check Valid Code
+	ex, _ := redis.Exists(fmt.Sprintf(consts.RegisterEmailValidCode, req.Email))
+	if ex {
+		defer utility.DelEmailValidCodeLock(req.Email)
+		validCode, _ := redis.Get(fmt.Sprintf(consts.RegisterEmailValidCode, req.Email))
+		if validCode != req.ValidCode {
+			logs.Error("[RegisterController][Register] Valid Code not match. Please try again")
+			ctl.Error(consts.VALID_CODE_NOT_MATCH)
+		}
+	}
 
+	acc := models.Account{}
 	errCode, err := acc.Register(req)
 	if err != nil || errCode != 0 {
 		if errCode == 0 {

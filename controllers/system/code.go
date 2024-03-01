@@ -16,13 +16,13 @@ type CodeController struct {
 	BaseController
 }
 
-// GetCode
+// GetValidCode
 //
 //	@Title			忘记密码获取邮件验证码
 //	@Description	忘记密码获取邮件验证码
 //	@Success		200			{string}	"success"
-//	@router			/getcode [get]
-func (ctl *CodeController) GetCode() {
+//	@router			/getvalidcode [get]
+func (ctl *CodeController) GetValidCode() {
 	type reqGetCode struct {
 		Email string `valid:"Required;Email;"`
 	}
@@ -48,12 +48,8 @@ func (ctl *CodeController) GetCode() {
 			a := time.Unix(timeLeft, 0)
 			b := time.Now()
 			c := int(a.Sub(b).Seconds())
-			logs.Error("a")
-
 			ctl.Error(errCode, fmt.Sprintf("Please try again in %v seconds", c))
 		} else {
-			logs.Error("q")
-
 			ctl.Error(errCode)
 		}
 	}
