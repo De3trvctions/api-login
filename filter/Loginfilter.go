@@ -14,7 +14,7 @@ import (
 
 var LoginManager = func(ctx *context.Context) {
 	// 返回值值
-	var responseText = `{"Code":10008,"Msg":"未登陆"}`
+	var responseText = `{"Code":10008,"Msg":"Not Login"}`
 	token := ctx.Input.Header("Token")
 	requestUrl := ctx.Request.URL.String()
 	charIndex := strings.Index(requestUrl, "?")

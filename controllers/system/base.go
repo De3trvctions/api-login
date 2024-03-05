@@ -92,16 +92,17 @@ func (ctl *PermissionController) CheckLogin() {
 
 func (ctl *PermissionController) GetUserFromToken() (loginToken LoginToken) {
 	token := ctl.Ctx.Input.Header("Token")
-
-	tokenMap := jwt.Parse(token, config.TokenSalt)
-	accountId, _ := tokenMap["AccountId"].(float64)
-	username, _ := tokenMap["UserName"].(string)
-	ip, _ := tokenMap["Ip"].(string)
-	loginToken = LoginToken{
-		AccountId: int64(accountId),
-		UserName:  username,
-		Ip:        ip,
-		Token:     token,
+	if len(token) > 0 {
+		tokenMap := jwt.Parse(token, config.TokenSalt)
+		accountId, _ := tokenMap["AccountId"].(float64)
+		username, _ := tokenMap["UserName"].(string)
+		ip, _ := tokenMap["Ip"].(string)
+		loginToken = LoginToken{
+			AccountId: int64(accountId),
+			UserName:  username,
+			Ip:        ip,
+			Token:     token,
+		}
 	}
 
 	return

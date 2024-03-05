@@ -21,7 +21,7 @@ import (
 )
 
 type LoginController struct {
-	BaseController
+	PermissionController
 }
 
 // Login
@@ -151,4 +151,13 @@ func delToken(username string) {
 			logs.Error("[delToken] Error 2: ", err2)
 		}
 	}
+}
+
+func (ctl *LoginController) Logout() {
+	defer logs.Info("[LoginController][Logout] Username:", ctl.Username)
+
+	loginToken := ctl.GetUserFromToken()
+	delToken(loginToken.UserName)
+
+	ctl.Success("success")
 }
