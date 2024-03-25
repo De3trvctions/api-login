@@ -12,4 +12,5 @@ type ReqEditAccount struct {
 	Email       string
 	Password    string
 	NewPassword string
+	ValidCode   string
 }

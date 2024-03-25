@@ -3,10 +3,12 @@ package models
 import (
 	"api-login/consts"
 	"api-login/models/dto"
+	"api-login/redis"
 	"api-login/utility"
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -203,6 +205,19 @@ func (acc *Account) Edit(req dto.ReqEditAccount) (errCode int64, err error) {
 	var updateField []string
 
 	if req.Email != acc.Email {
+		// Check Valid Code
+		ex, _ := redis.Exists(fmt.Sprintf(consts.RegisterEmailValidCode, req.Email))
+		if ex {
+			defer utility.DelEmailValidCodeLock(req.Email)
+			validCode, _ := redis.Get(fmt.Sprintf(consts.RegisterEmailValidCode, req.Email))
+			if validCode != req.ValidCode {
+				logs.Error("[RegisterController][Register] Valid Code not match. Please try again")
+				ctl.Error(consts.VALID_CODE_NOT_MATCH)
+			}
+		} else {
+			ctl.Error(consts.VALID_CODE_NOT_MATCH)
+		}
+
 		acc.Email = req.Email
 		updateField = append(updateField, "Email")
 	}
