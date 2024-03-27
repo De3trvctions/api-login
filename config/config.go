@@ -1,34 +1,29 @@
 package config
 
 import (
-	"api-login/mail"
 	"api-login/utility"
-	"encoding/json"
 
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 )
 
+// Use when ever data is in app.conf
 var (
-	HttpPort           int64
-	TokenSalt          string
-	TokenExpMinute     int64
-	TokenMaxExpSecond  int64
-	Mail               []*mail.Option
-	ValidCodeExpMinute int64
+	HttpPort         int64
+	NacosPort        int64
+	NacosUrl         string
+	NacosNamespaceId string
+	NacosDataId      string
+	NacosGroupId     string
 )
 
 func init() {
 	HttpPort = utility.StringToInt64(getValue("HttpPort"))
-	TokenSalt = getValue("TokenSalt")
-	TokenExpMinute = utility.StringToInt64(getValue("TokenExpMinute"))
-	TokenMaxExpSecond = utility.StringToInt64(getValue("TokenMaxExpSecond"))
-	err := json.Unmarshal([]byte(getValue("AppPassword")), &Mail)
-	if err != nil {
-		logs.Error("Error:", err)
-		return
-	}
-	ValidCodeExpMinute = utility.StringToInt64(getValue("ValidCodeExpMinute"))
+	NacosPort = utility.StringToInt64(getValue("NacosPort"))
+	NacosUrl = getValue("NacosUrl")
+	NacosNamespaceId = getValue("NacosNamespaceId")
+	NacosDataId = getValue("NacosDataId")
+	NacosGroupId = getValue("NacosGroupId")
 }
 
 func getValue(key string) string {

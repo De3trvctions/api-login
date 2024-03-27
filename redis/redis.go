@@ -13,13 +13,12 @@ var (
 	redisCli *redis.Client
 )
 
-// TODO: Change to nacos
-func InitRedis() {
+func InitRedis(redisAddr string) {
 	once.Do(func() {
 		redisCli = redis.NewClient(&redis.Options{
-			Addr:     "localhost:6379", // Redis server address
-			Password: "",               // No password
-			DB:       0,                // Default database
+			Addr:     redisAddr, // Redis server address
+			Password: "",        // No password
+			DB:       0,         // Default database
 		})
 	})
 

@@ -2,24 +2,25 @@ package db
 
 import (
 	_ "api-login/models"
+	"api-login/nacos"
 	"database/sql"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
 
 func InitDB() {
-	dbDriver, _ := web.AppConfig.String("db.driver")
-	dbUser, _ := web.AppConfig.String("db.user")
-	dbPass, _ := web.AppConfig.String("db.passwd")
-	dbHost, _ := web.AppConfig.String("db.host")
-	dbPort, _ := web.AppConfig.String("db.port")
-	dbName, _ := web.AppConfig.String("db.name")
+	dbDriver := nacos.DBDriver
+	dbUser := nacos.DBUser
+	dbPass := nacos.DBPassword
+	dbHost := nacos.DBHost
+	dbPort := nacos.DBPort
+	dbName := nacos.DBName
+
 	// Construct data source name (DSN)
 	dsn := dbUser + ":" + dbPass + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8"
 

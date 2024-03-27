@@ -1,11 +1,11 @@
 package system
 
 import (
-	"api-login/config"
 	"api-login/consts"
 	"api-login/jwt"
 	"api-login/models"
 	"api-login/models/dto"
+	"api-login/nacos"
 	"api-login/nets"
 	"api-login/redis"
 	"api-login/utility"
@@ -127,15 +127,15 @@ func getToken(req dto.ReqLogin, id int64) (token string) {
 		"Username":  req.Username,
 		"AccountId": id,
 		"Ip":        req.IP,
-	}, config.TokenSalt, time.Duration(config.TokenExpMinute)*time.Minute)
+	}, nacos.TokenSalt, time.Duration(nacos.TokenExpMinute)*time.Minute)
 	setToken(token, req.Username)
 	return
 }
 
 func setToken(token, username string) {
 	// Set token expired as 1 days
-	_ = redis.Set(fmt.Sprintf(consts.AccountLoginByToken, token), username, time.Duration(config.TokenExpMinute)*time.Minute)
-	_ = redis.Set(fmt.Sprintf(consts.AccountLoginByUsername, username), token, time.Duration(config.TokenExpMinute)*time.Minute)
+	_ = redis.Set(fmt.Sprintf(consts.AccountLoginByToken, token), username, time.Duration(nacos.TokenExpMinute)*time.Minute)
+	_ = redis.Set(fmt.Sprintf(consts.AccountLoginByUsername, username), token, time.Duration(nacos.TokenExpMinute)*time.Minute)
 }
 
 func delToken(username string) {

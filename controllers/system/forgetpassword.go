@@ -1,10 +1,10 @@
 package system
 
 import (
-	"api-login/config"
 	"api-login/consts"
 	"api-login/models"
 	"api-login/models/dto"
+	"api-login/nacos"
 	"api-login/redis"
 	"api-login/utility"
 	"api-login/validation"
@@ -52,7 +52,7 @@ func (ctl *ForgetPasswordController) ForgetPasswordGetCode() {
 		ctl.Error(consts.FORGET_PASSWORD_EMAIL_NOT_MATCH)
 	}
 
-	code, timeLeft, errCode, err := utility.SendMail(consts.ForgetPasswordEmailValidCode, consts.ForgetPasswordEmailValidCodeLock, req.Email, "Forget Password Validation Code", "Please use this validation code for forget password", config.ValidCodeExpMinute)
+	code, timeLeft, errCode, err := utility.SendMail(consts.ForgetPasswordEmailValidCode, consts.ForgetPasswordEmailValidCodeLock, req.Email, "Forget Password Validation Code", "Please use this validation code for forget password", nacos.ValidCodeExpMinute)
 	if err != nil || errCode != 0 || timeLeft > 0 {
 		if errCode == 0 {
 			errCode = consts.OPERATION_FAILED

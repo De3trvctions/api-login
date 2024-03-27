@@ -1,9 +1,9 @@
 package system
 
 import (
-	"api-login/config"
 	"api-login/consts"
 	"api-login/jwt"
+	"api-login/nacos"
 	"fmt"
 	"strings"
 
@@ -93,7 +93,7 @@ func (ctl *PermissionController) CheckLogin() {
 func (ctl *PermissionController) GetUserFromToken() (loginToken LoginToken) {
 	token := ctl.Ctx.Input.Header("Token")
 	if len(token) > 0 {
-		tokenMap := jwt.Parse(token, config.TokenSalt)
+		tokenMap := jwt.Parse(token, nacos.TokenSalt)
 		accountId, _ := tokenMap["AccountId"].(float64)
 		username, _ := tokenMap["UserName"].(string)
 		ip, _ := tokenMap["Ip"].(string)

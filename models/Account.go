@@ -212,10 +212,12 @@ func (acc *Account) Edit(req dto.ReqEditAccount) (errCode int64, err error) {
 			validCode, _ := redis.Get(fmt.Sprintf(consts.RegisterEmailValidCode, req.Email))
 			if validCode != req.ValidCode {
 				logs.Error("[RegisterController][Register] Valid Code not match. Please try again")
-				ctl.Error(consts.VALID_CODE_NOT_MATCH)
+				errCode = consts.VALID_CODE_NOT_MATCH
+				return
 			}
 		} else {
-			ctl.Error(consts.VALID_CODE_NOT_MATCH)
+			errCode = consts.VALID_CODE_NOT_MATCH
+			return
 		}
 
 		acc.Email = req.Email

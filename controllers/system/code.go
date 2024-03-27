@@ -1,8 +1,8 @@
 package system
 
 import (
-	"api-login/config"
 	"api-login/consts"
+	"api-login/nacos"
 	"api-login/utility"
 	"api-login/validation"
 	"fmt"
@@ -37,7 +37,7 @@ func (ctl *CodeController) GetValidCode() {
 		ctl.Error(consts.PARAM_ERROR)
 	}
 
-	code, timeLeft, errCode, err := utility.SendMail(consts.RegisterEmailValidCode, consts.RegisterEmailValidCodeLock, req.Email, "Email Validation Code", "", config.ValidCodeExpMinute)
+	code, timeLeft, errCode, err := utility.SendMail(consts.RegisterEmailValidCode, consts.RegisterEmailValidCodeLock, req.Email, "Email Validation Code", "", nacos.ValidCodeExpMinute)
 	if err != nil || errCode != 0 || timeLeft > 0 {
 		if errCode == 0 {
 			errCode = consts.OPERATION_FAILED

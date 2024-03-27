@@ -1,9 +1,9 @@
 package filter
 
 import (
-	"api-login/config"
 	"api-login/consts"
 	"api-login/jwt"
+	"api-login/nacos"
 	"api-login/redis"
 	"fmt"
 	"strings"
@@ -31,8 +31,7 @@ var LoginManager = func(ctx *context.Context) {
 		logs.Error("[LoginFilter]Token Empty not login[Url](%s) [Token](%s)", requestUrl, token)
 		goto NoLogin
 	} else {
-		tokenMap := jwt.Parse(token, config.TokenSalt)
-		//logs.Debug("[LoginFilter]FromToken", token, config.TokenSalt, tokenMap)
+		tokenMap := jwt.Parse(token, nacos.TokenSalt)
 		if tokenMap == nil {
 			logs.Error("[LoginFilter]FromToken Failed Not Login[Url](%s) [Token](%s)", requestUrl, token)
 			goto NoLogin

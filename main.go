@@ -3,6 +3,7 @@ package main
 import (
 	"api-login/config"
 	"api-login/filter"
+	initilize "api-login/initialize"
 	_ "api-login/routers"
 	"api-login/validation"
 	"fmt"
@@ -13,17 +14,13 @@ import (
 
 func main() {
 	// Init required information
-	config.InitLogs()
-	config.InitRedis()
-	config.InitDB()
-	config.InitLanguage()
-	config.InitMail()
+	initilize.InitLogs()
+	initilize.InitNacosConfig()
+	initilize.InitRedis()
+	initilize.InitDB()
+	initilize.InitLanguage()
+	initilize.InitMail()
 	validation.Init()
-
-	// redisKey := "mykey"
-	// _ = redis.Set(redisKey, "myvalue", 0)
-	// aaa, _ := redis.Get(redisKey)
-	// logs.Error(aaa)
 
 	web.InsertFilter("*", web.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins:  true,
