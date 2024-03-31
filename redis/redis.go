@@ -13,12 +13,13 @@ var (
 	redisCli *redis.Client
 )
 
-func InitRedis(redisAddr string) {
+func InitRedis(redisAddr, redisPort string) {
+	redisFullAddress := redisAddr + ":" + redisPort
 	once.Do(func() {
 		redisCli = redis.NewClient(&redis.Options{
-			Addr:     redisAddr, // Redis server address
-			Password: "",        // No password
-			DB:       0,         // Default database
+			Addr:     redisFullAddress, // Redis server address
+			Password: "",               // No password
+			DB:       0,                // Default database
 		})
 	})
 

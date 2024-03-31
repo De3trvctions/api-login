@@ -31,6 +31,7 @@ var (
 	DBPort             string
 	DBName             string
 	RedisAddr          string
+	RedisPort          string
 )
 
 func SyncConf(conf config_client.IConfigClient, dataId, groupId string) (err error) {
@@ -107,13 +108,14 @@ func setValues(dataId string) {
 	TokenExpMinute = setting.Int("TokenExpMinute", 0)
 	TokenMaxExpSecond = setting.Int("TokenMaxExpSecond", 0)
 	ValidCodeExpMinute = setting.Int("ValidCodeExpMinute", 0)
-	DBDriver = setting.String("DBDriver", "")
+	DBDriver = setting.String("DBDriver", "mysql")
 	DBUser = setting.String("DBUser", "")
 	DBPassword = setting.String("DBPassword", "")
 	DBHost = setting.String("DBHost", "")
 	DBPort = setting.String("DBPort", "")
 	DBName = setting.String("DBName", "")
-	RedisAddr = setting.String("RedisAddr", "")
+	RedisAddr = setting.String("RedisAddr", "127.0.0.1")
+	RedisPort = setting.String("RedisPort", "6379")
 }
 
 func (s *Setting) Strings(k string, def ...string) []string {

@@ -19,4 +19,5 @@ AppPassword = [{"AliasName":"","Address":"smtp.gmail.com:587","AuthMethod":0,"Au
 # Email ValidCode
 ValidCodeExpMinute = 15
 
-RedisAddr = localhost:6379
+RedisAddr = localhost
+RedisPort = 6379

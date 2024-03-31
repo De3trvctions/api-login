@@ -22,7 +22,7 @@ func InitLogs() {
 }
 
 func InitRedis() {
-	redis.InitRedis(nacos.RedisAddr)
+	redis.InitRedis(nacos.RedisAddr, nacos.RedisPort)
 }
 
 func InitDB() {
