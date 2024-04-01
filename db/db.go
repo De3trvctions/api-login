@@ -13,7 +13,7 @@ import (
 
 var db *sql.DB
 
-func InitDB() {
+func InitDB(syncDB bool) {
 	dbDriver := nacos.DBDriver
 	dbUser := nacos.DBUser
 	dbPass := nacos.DBPassword
@@ -50,9 +50,12 @@ func InitDB() {
 	if err != nil {
 		logs.Error(err)
 	}
-	err = orm.RunSyncdb(aliasName, false, true)
-	if err != nil {
-		logs.Error(err)
+
+	if syncDB {
+		err = orm.RunSyncdb(aliasName, false, true)
+		if err != nil {
+			logs.Error(err)
+		}
 	}
 
 	logs.Info("[InitDB] Init DB Success")

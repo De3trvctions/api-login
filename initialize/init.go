@@ -26,7 +26,8 @@ func InitRedis() {
 }
 
 func InitDB() {
-	db.InitDB()
+	syncDB := false
+	db.InitDB(syncDB)
 }
 
 func InitLanguage() {
