@@ -41,7 +41,7 @@ func init() {
 }
 
 func (acc *Account) TableName() string {
-	return "cloud_data_account"
+	return "api_account"
 }
 
 func (acc *Account) SetHashPassword(password string) {

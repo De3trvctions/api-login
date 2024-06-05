@@ -77,7 +77,16 @@ func (ctl *LoginController) Login() {
 	token := getToken(req, acc.Id)
 
 	ctl.delRedisLoginFail(req.Username)
-	ctl.Success(web.M{"Token": token, "Username": acc.Username})
+
+	loginLog := model.LoginLog{}
+	errCode, err := loginLog.AddLog(req.IP, acc.Id)
+	if errCode != 0 || err != nil {
+		logs.Error("[LoginController][Login] Add login log fail", err)
+	}
+	ctl.Success(web.M{
+		"Token":    token,
+		"Username": acc.Username,
+	})
 }
 
 func (ctl *LoginController) getRedisLoginStatus(username string) (ableLogin bool, remaindingTime int) {
