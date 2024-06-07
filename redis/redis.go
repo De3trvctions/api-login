@@ -40,6 +40,14 @@ func Set(key string, val any, expiration ...time.Duration) error {
 	return redisCli.Set(key, val, getDuration(expiration[0])).Err()
 }
 
+func SetNx(key string, val any, expiration time.Duration) (bool, error) {
+	return redisCli.SetNX(key, val, getDuration(expiration)).Result()
+}
+
+func SetEx(key string, val any, expiration time.Duration) (bool, error) {
+	return redisCli.SetXX(key, val, getDuration(expiration)).Result()
+}
+
 func Get(key string) (string, error) {
 	return redisCli.Get(key).Result()
 }

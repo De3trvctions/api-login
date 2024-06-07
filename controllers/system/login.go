@@ -78,7 +78,7 @@ func (ctl *LoginController) Login() {
 
 	ctl.delRedisLoginFail(req.Username)
 
-	loginLog := model.LoginLog{}
+	loginLog := models.LoginLog{}
 	errCode, err := loginLog.AddLog(req.IP, acc.Id)
 	if errCode != 0 || err != nil {
 		logs.Error("[LoginController][Login] Add login log fail", err)
