@@ -13,3 +13,10 @@ const (
 	ForgetPasswordEmailValidCode     = "ForgetPasswordEmailValidCode:%s"
 	ForgetPasswordEmailValidCodeLock = "ForgetPasswordEmailValidCodeLock:%v"
 )
+
+// Daily Report Key
+const (
+	LoginLogTaskLock       = "Report-Login-Log-TaskLock"
+	LoginLogRepairTaskLock = "Report-Login-Log-Repair-TaskLock"
+	LoginLogPrefix         = "Report-Login-Log-Prefix"
+)
