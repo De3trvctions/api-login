@@ -2,6 +2,7 @@ package initilize
 
 import (
 	"api-login/config"
+	"api-login/crontask"
 	"api-login/db"
 	"api-login/mail"
 	"api-login/nacos"
@@ -26,7 +27,7 @@ func InitRedis() {
 }
 
 func InitDB() {
-	syncDB := false
+	syncDB := true
 	db.InitDB(syncDB)
 }
 
@@ -88,4 +89,8 @@ func InitNacosConfig() {
 		logs.Error("[InitNacosConfig] Init Nacos error 2", err)
 	}
 	logs.Info("[InitLanguage] Init Nacos Success")
+}
+
+func InitCron() {
+	crontask.InitCronTask()
 }

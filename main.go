@@ -32,5 +32,8 @@ func main() {
 
 	web.InsertFilter("/user/*", web.BeforeRouter, filter.LoginManager)
 
+	// Cron Job
+	initilize.InitCron()
+
 	web.Run(fmt.Sprintf(":%d", config.HttpPort))
 }
