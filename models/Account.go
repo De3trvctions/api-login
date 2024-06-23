@@ -17,15 +17,19 @@ import (
 
 type Account struct {
 	CommStruct
-	Username string `orm:"description(用户名)"`
-	Password string `orm:"description(用户密码)"`
-	Email    string `orm:"description(邮件)"`
+	Username    string `orm:"description(用户名)"`
+	Password    string `orm:"description(用户密码)"`
+	Email       string `orm:"description(邮件)"`
+	Phone       int    `orm:"description(手机号码)"`
+	CountryCode int    `orm:"description(国家地区编码)"`
 }
 
 type AccountInfo struct {
 	CommStruct
-	Username string
-	Email    string
+	Username    string
+	Email       string
+	Phone       int
+	CountryCode int
 }
 
 func (acc *Account) SetUpdateTime() {
@@ -222,6 +226,12 @@ func (acc *Account) Edit(req dto.ReqEditAccount) (errCode int64, err error) {
 
 		acc.Email = req.Email
 		updateField = append(updateField, "Email")
+	}
+
+	if (req.CountryCode != 0 && req.Phone != 0) && (req.CountryCode != acc.CountryCode || req.Phone != acc.Phone) {
+		acc.CountryCode = req.CountryCode
+		acc.Phone = req.Phone
+		updateField = append(updateField, "CountryCode", "Phone")
 	}
 
 	hashPassword := acc.GetHashPassword(req.NewPassword)

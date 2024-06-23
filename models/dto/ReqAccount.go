@@ -13,4 +13,6 @@ type ReqEditAccount struct {
 	Password    string
 	NewPassword string
 	ValidCode   string
+	Phone       int
+	CountryCode int
 }
