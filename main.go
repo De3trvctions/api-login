@@ -1,12 +1,13 @@
 package main
 
 import (
-	"api-login/config"
+	cron "api-login/crontask"
 	"api-login/filter"
-	initilize "api-login/initialize"
 	_ "api-login/routers"
-	"api-login/validation"
 	"fmt"
+	"standard-library/config"
+	initilize "standard-library/initialize"
+	"standard-library/validation"
 
 	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/filter/cors"
@@ -33,7 +34,7 @@ func main() {
 	web.InsertFilter("/user/*", web.BeforeRouter, filter.LoginManager)
 
 	// Cron Job
-	initilize.InitCron()
+	cron.InitCronTask()
 
 	web.Run(fmt.Sprintf(":%d", config.HttpPort))
 }

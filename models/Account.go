@@ -1,14 +1,14 @@
 package models
 
 import (
-	"api-login/consts"
 	"api-login/models/dto"
-	"api-login/redis"
-	"api-login/utility"
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"standard-library/consts"
+	"standard-library/redis"
+	"standard-library/utility"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"

@@ -9,7 +9,7 @@ import (
 func InitCronTask() {
 	c := cron.New(cron.WithSeconds())
 
-	c.AddFunc("0 15 12 * * *", dailyreport.RunDailyLoginLogReport) // RUn at 0015 everyday
+	c.AddFunc("1 * * * * *", dailyreport.RunDailyLoginLogReport) // RUn at 0015 everyday
 
 	c.Start()
 }

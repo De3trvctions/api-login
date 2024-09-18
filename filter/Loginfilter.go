@@ -1,11 +1,11 @@
 package filter
 
 import (
-	"api-login/consts"
-	"api-login/jwt"
-	"api-login/nacos"
-	"api-login/redis"
 	"fmt"
+	"standard-library/consts"
+	"standard-library/jwt"
+	"standard-library/nacos"
+	"standard-library/redis"
 	"strings"
 
 	"github.com/beego/beego/v2/core/logs"

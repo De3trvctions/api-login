@@ -1,11 +1,11 @@
 package dailyreport
 
 import (
-	"api-login/consts"
-	"api-login/nacos"
-	"api-login/redis"
-	"api-login/utility"
 	"fmt"
+	"standard-library/consts"
+	"standard-library/nacos"
+	"standard-library/redis"
+	"standard-library/utility"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"

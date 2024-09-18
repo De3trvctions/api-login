@@ -1,14 +1,14 @@
 package system
 
 import (
-	"api-login/consts"
 	"api-login/models"
 	"api-login/models/dto"
-	"api-login/nacos"
-	"api-login/redis"
-	"api-login/utility"
-	"api-login/validation"
 	"fmt"
+	"standard-library/consts"
+	"standard-library/nacos"
+	"standard-library/redis"
+	"standard-library/utility"
+	"standard-library/validation"
 	"time"
 
 	"github.com/beego/beego/v2/core/logs"

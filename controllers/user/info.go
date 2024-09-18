@@ -1,11 +1,11 @@
 package user
 
 import (
-	"api-login/consts"
 	"api-login/controllers/system"
 	"api-login/models"
 	"api-login/models/dto"
-	"api-login/validation"
+	"standard-library/consts"
+	"standard-library/validation"
 
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"

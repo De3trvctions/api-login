@@ -1,10 +1,10 @@
 package system
 
 import (
-	"api-login/consts"
-	"api-login/jwt"
-	"api-login/nacos"
 	"fmt"
+	"standard-library/consts"
+	"standard-library/jwt"
+	"standard-library/nacos"
 	"strings"
 
 	"github.com/beego/beego/v2/server/web"

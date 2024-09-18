@@ -1,18 +1,18 @@
 package system
 
 import (
-	"api-login/consts"
-	"api-login/jwt"
 	"api-login/models"
 	"api-login/models/dto"
-	"api-login/nacos"
-	"api-login/nets"
-	"api-login/redis"
-	"api-login/utility"
-	"api-login/validation"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"standard-library/consts"
+	"standard-library/jwt"
+	"standard-library/nacos"
+	"standard-library/nets"
+	"standard-library/redis"
+	"standard-library/utility"
+	"standard-library/validation"
 	"strconv"
 	"time"
 

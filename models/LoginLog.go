@@ -1,8 +1,8 @@
 package models
 
 import (
-	"api-login/consts"
-	"api-login/utility"
+	"standard-library/consts"
+	"standard-library/utility"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"

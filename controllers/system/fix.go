@@ -1,11 +1,11 @@
 package system
 
 import (
-	"api-login/consts"
 	"api-login/dailyreport"
-	"api-login/utility"
-	"api-login/validation"
 	"fmt"
+	"standard-library/consts"
+	"standard-library/utility"
+	"standard-library/validation"
 	"time"
 
 	"github.com/beego/beego/v2/core/logs"
