@@ -110,17 +110,13 @@ func (ctl *BaseController) CommonRequestMicroService(data string, api func(conte
 	}
 
 	response, _ := api(ctx, request)
-	logs.Error("阿四大大大大", response)
 	if response.Code != consts.SUCCESS_REQUEST && response.Code != 0 {
 		if response.Data != "" {
-			logs.Error("132", response)
 			ctl.Error(response.Code, response.Data)
 		} else {
-			logs.Error("7655", response)
 			ctl.Error(response.Code)
 		}
 	}
-	logs.Error("fasfasas")
 	ctl.DirectWriteJson(response.Data)
 }
 
