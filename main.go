@@ -21,6 +21,7 @@ func main() {
 	initilize.InitDB()
 	initilize.InitLanguage()
 	initilize.InitMail()
+	initilize.InitGRPC()
 	validation.Init()
 
 	web.InsertFilter("*", web.BeforeRouter, cors.Allow(&cors.Options{
@@ -29,7 +30,7 @@ func main() {
 		AllowHeaders:     []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Token", "Language"},
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin"},
 		AllowCredentials: true,
-	}), web.WithReturnOnOutput(false))
+	}), web.WithReturnOnOutput(true))
 
 	web.InsertFilter("/user/*", web.BeforeRouter, filter.LoginManager)
 

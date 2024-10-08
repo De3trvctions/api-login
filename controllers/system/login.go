@@ -1,17 +1,13 @@
 package system
 
 import (
-	"api-login/models"
+	"api-login-proto/login"
 	"api-login/models/dto"
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"standard-library/consts"
 	"standard-library/jwt"
 	"standard-library/nacos"
-	"standard-library/nets"
 	"standard-library/redis"
-	"standard-library/utility"
 	"standard-library/validation"
 	"strconv"
 	"time"
@@ -22,6 +18,17 @@ import (
 
 type LoginController struct {
 	PermissionController
+	GRPCClient login.ActivityChangeLogServiceClient
+}
+
+func (ctl *LoginController) Prepare() {
+	ctl.PermissionController.Prepare()
+	//初始化连接
+	ctl.ConnGRpc("service-login")
+	ctl.GRPCClient = login.NewActivityChangeLogServiceClient(ctl.GrpcConn.Conn())
+	if ctl.GRPCClient == nil {
+		ctl.Error(consts.SERVER_ERROR)
+	}
 }
 
 // Login
@@ -35,6 +42,7 @@ type LoginController struct {
 //	@Param			IP			formData	string	false	IP地址
 //	@router			/ [post]
 func (ctl *LoginController) Login() {
+
 	req := dto.ReqLogin{}
 	if err := ctl.ParseForm(&req); err != nil {
 		logs.Error("[LoginController][Login] Parse Form Error", err)
@@ -45,48 +53,50 @@ func (ctl *LoginController) Login() {
 		ctl.Error(consts.PARAM_ERROR)
 	}
 
-	ableLogin, ableLoginRemaindingTime := ctl.getRedisLoginStatus(req.Username)
+	ctl.CommonJSONRequest(req, ctl.GRPCClient.Login)
 
-	if !ableLogin {
-		leftSec := ableLoginRemaindingTime % 60
-		leftMin := int(ableLoginRemaindingTime / 60)
-		logs.Error("[LoginController][Login] 账号封锁中。剩余解封时间%d分钟%d秒", leftMin, leftSec)
-		ctl.Error(consts.LOGIN_LOCK, fmt.Sprintf("请在%d分钟%d秒后再进行尝试", leftMin, leftSec))
-	}
+	// ableLogin, ableLoginRemaindingTime := ctl.getRedisLoginStatus(req.Username)
 
-	acc := models.Account{}
-	acc.Username = req.Username
+	// if !ableLogin {
+	// 	leftSec := ableLoginRemaindingTime % 60
+	// 	leftMin := int(ableLoginRemaindingTime / 60)
+	// 	logs.Error("[LoginController][Login] 账号封锁中。剩余解封时间%d分钟%d秒", leftMin, leftSec)
+	// 	ctl.Error(consts.LOGIN_LOCK, fmt.Sprintf("请在%d分钟%d秒后再进行尝试", leftMin, leftSec))
+	// }
 
-	db := utility.NewDB()
-	err := db.Get(&acc, "Username")
-	if err != nil {
-		logs.Error("[LoginController][Login] Account not found", err)
-		ctl.Error(consts.USERNAME_NOT_FOUND)
-	}
+	// acc := models.Account{}
+	// acc.Username = req.Username
 
-	hash := md5.Sum([]byte(req.Password))
-	hashPassword := hex.EncodeToString(hash[:])
-	if hashPassword != acc.Password {
-		ctl.setRedisLoginFail(req.Username)
-		logs.Error("[LoginController][Login] Password not match. req: %s", hashPassword)
-		ctl.Error(consts.PASSWORD_NOT_MATCH)
-	}
+	// db := utility.NewDB()
+	// err := db.Get(&acc, "Username")
+	// if err != nil {
+	// 	logs.Error("[LoginController][Login] Account not found", err)
+	// 	ctl.Error(consts.USERNAME_NOT_FOUND)
+	// }
 
-	// Generate JWT Token and return
-	req.IP = nets.IP(ctl.Ctx.Request).String()
-	token := getToken(req, acc.Id)
+	// hash := md5.Sum([]byte(req.Password))
+	// hashPassword := hex.EncodeToString(hash[:])
+	// if hashPassword != acc.Password {
+	// 	ctl.setRedisLoginFail(req.Username)
+	// 	logs.Error("[LoginController][Login] Password not match. req: %s", hashPassword)
+	// 	ctl.Error(consts.PASSWORD_NOT_MATCH)
+	// }
 
-	ctl.delRedisLoginFail(req.Username)
+	// // Generate JWT Token and return
+	// req.IP = nets.IP(ctl.Ctx.Request).String()
+	// token := getToken(req, acc.Id)
 
-	loginLog := models.LoginLog{}
-	errCode, err := loginLog.AddLog(req.IP, acc.Id)
-	if errCode != 0 || err != nil {
-		logs.Error("[LoginController][Login] Add login log fail", err)
-	}
-	ctl.Success(web.M{
-		"Token":    token,
-		"Username": acc.Username,
-	})
+	// ctl.delRedisLoginFail(req.Username)
+
+	// loginLog := models.LoginLog{}
+	// errCode, err := loginLog.AddLog(req.IP, acc.Id)
+	// if errCode != 0 || err != nil {
+	// 	logs.Error("[LoginController][Login] Add login log fail", err)
+	// }
+	// ctl.Success(web.M{
+	// 	"Token":    token,
+	// 	"Username": acc.Username,
+	// })
 }
 
 func (ctl *LoginController) getRedisLoginStatus(username string) (ableLogin bool, remaindingTime int) {

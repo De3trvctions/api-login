@@ -21,3 +21,7 @@ ValidCodeExpMinute = 15
 
 RedisAddr = localhost
 RedisPort = 6379
+
+#GRPC
+GRPC = {"MaxIdle":8,"MaxActive":64,"MaxConcurrentStreams":64,"RecycleDur":600,"Reuse":true,"Logger":{"Open":false}}
+Service = {"service-login":"localhost:55000"}
