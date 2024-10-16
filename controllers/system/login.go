@@ -2,10 +2,10 @@ package system
 
 import (
 	"api-login-proto/login"
-	"api-login/models/dto"
 	"fmt"
 	"standard-library/consts"
 	"standard-library/jwt"
+	"standard-library/models/dto"
 	"standard-library/nacos"
 	"standard-library/redis"
 	"standard-library/validation"
@@ -54,49 +54,6 @@ func (ctl *LoginController) Login() {
 	}
 
 	ctl.CommonJSONRequest(req, ctl.GRPCClient.Login)
-
-	// ableLogin, ableLoginRemaindingTime := ctl.getRedisLoginStatus(req.Username)
-
-	// if !ableLogin {
-	// 	leftSec := ableLoginRemaindingTime % 60
-	// 	leftMin := int(ableLoginRemaindingTime / 60)
-	// 	logs.Error("[LoginController][Login] 账号封锁中。剩余解封时间%d分钟%d秒", leftMin, leftSec)
-	// 	ctl.Error(consts.LOGIN_LOCK, fmt.Sprintf("请在%d分钟%d秒后再进行尝试", leftMin, leftSec))
-	// }
-
-	// acc := models.Account{}
-	// acc.Username = req.Username
-
-	// db := utility.NewDB()
-	// err := db.Get(&acc, "Username")
-	// if err != nil {
-	// 	logs.Error("[LoginController][Login] Account not found", err)
-	// 	ctl.Error(consts.USERNAME_NOT_FOUND)
-	// }
-
-	// hash := md5.Sum([]byte(req.Password))
-	// hashPassword := hex.EncodeToString(hash[:])
-	// if hashPassword != acc.Password {
-	// 	ctl.setRedisLoginFail(req.Username)
-	// 	logs.Error("[LoginController][Login] Password not match. req: %s", hashPassword)
-	// 	ctl.Error(consts.PASSWORD_NOT_MATCH)
-	// }
-
-	// // Generate JWT Token and return
-	// req.IP = nets.IP(ctl.Ctx.Request).String()
-	// token := getToken(req, acc.Id)
-
-	// ctl.delRedisLoginFail(req.Username)
-
-	// loginLog := models.LoginLog{}
-	// errCode, err := loginLog.AddLog(req.IP, acc.Id)
-	// if errCode != 0 || err != nil {
-	// 	logs.Error("[LoginController][Login] Add login log fail", err)
-	// }
-	// ctl.Success(web.M{
-	// 	"Token":    token,
-	// 	"Username": acc.Username,
-	// })
 }
 
 func (ctl *LoginController) getRedisLoginStatus(username string) (ableLogin bool, remaindingTime int) {
