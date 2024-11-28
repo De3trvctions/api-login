@@ -1,6 +1,7 @@
 package user
 
 import (
+	account "api-login-proto/account"
 	"api-login/controllers/system"
 	"api-login/models"
 	"api-login/models/dto"
@@ -13,6 +14,7 @@ import (
 
 type InfoController struct {
 	system.PermissionController
+	GRPCClient account.UserAccountServiceClient
 }
 
 func (ctl *InfoController) Prepare() {
@@ -110,4 +112,30 @@ func (ctl *InfoController) Edit() {
 	}
 
 	ctl.Success("success")
+}
+
+// Info
+//
+//	@Title			Account Info
+//	@Description	Account Info Detail
+//	@Success		200			{object}	web.M
+//	@Param			AccountId	query		int64	false	"AccountID"
+//	@Param			Username	query		string	false	"Account Username"
+//	@Param			Email		query		string	false	"Account Email"
+//	@Param			CreateTime	query		int64	false	"Account create time"
+//	@Param			Page		query		int64	false	"Page"
+//	@Param			PageSize	query		int64	false	"Page Size"
+//	@router			/info [get]
+func (ctl *InfoController) Info() {
+	req := dto.ReqAccountDetail{}
+	if err := ctl.ParseForm(&req); err != nil {
+		logs.Error("[InfoController][Info] Parse Form Error", err)
+		ctl.Error(consts.FAILED_REQUEST)
+	}
+	if err := validation.ValidateRequest(&req); err != nil {
+		logs.Error("[InfoController][Info] FormValidate fail, req : %+v, error: %+v", req, err)
+		ctl.Error(consts.PARAM_ERROR)
+	}
+
+	ctl.CommonJSONRequest(req, ctl.GRPCClient.Info)
 }
