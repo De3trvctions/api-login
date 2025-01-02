@@ -2,6 +2,7 @@ package system
 
 import (
 	"api-login-proto/login"
+	"encoding/json"
 	"fmt"
 	"standard-library/consts"
 	"standard-library/models/dto"
@@ -49,6 +50,29 @@ func (ctl *LoginController) Login() {
 	}
 
 	ctl.CommonJSONRequest(req, ctl.GRPCClient.Login)
+}
+
+// Test Get and return JSON body
+//
+//	@router			/test [post]
+func (ctl *LoginController) Test() {
+	body := ctl.Ctx.Input.RequestBody
+
+	// Print the raw request body as a string
+	fmt.Println("Raw Request Body:", string(body))
+
+	// Declare a variable to hold the unmarshalled data
+	var jsonData interface{}
+
+	// Unmarshal the raw JSON body into jsonData
+	if err := json.Unmarshal(body, &jsonData); err != nil {
+		logs.Error("Error unmarshalling JSON: %v", err)
+		ctl.Error(consts.FAILED_REQUEST, err.Error())
+		return
+	}
+
+	// Respond with the same body
+	ctl.Success(jsonData)
 }
 
 // func (ctl *LoginController) getRedisLoginStatus(username string) (ableLogin bool, remaindingTime int) {

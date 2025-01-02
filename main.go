@@ -37,5 +37,8 @@ func main() {
 	// Cron Job
 	cron.InitCronTask()
 
+	// To enable getting json body for the request instead of onlu using form-data
+	web.BConfig.CopyRequestBody = true
+
 	web.Run(fmt.Sprintf(":%d", config.HttpPort))
 }
