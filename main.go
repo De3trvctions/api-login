@@ -16,6 +16,7 @@ import (
 func main() {
 	// Init required information
 	initilize.InitLogs()
+	initilize.InitES()
 	initilize.InitNacosConfig()
 	initilize.InitRedis()
 	initilize.InitDB()
