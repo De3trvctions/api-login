@@ -39,10 +39,31 @@ services:
     depends_on:
       - elasticsearch
 
+  nacos:
+    image: nacos/nacos-server:v2.0.3
+    container_name: nacos
+    environment:
+      - MODE=standalone
+      - NACOS_AUTH_ENABLE=false # Disable authentication (optional)
+    ports:
+      - '8848:8848' # Nacos default port
+    networks:
+      - elastic
+    volumes:
+      - nacos-data:/home/nacos/nacos-data # Persists data across restarts
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8848/nacos']
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+
 networks:
   elastic:
     driver: bridge
 
 volumes:
   esdata:
+    driver: local
+  nacos-data:
     driver: local
