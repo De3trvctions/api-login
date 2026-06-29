@@ -1,19 +1,22 @@
 package main
 
 import (
+	"api-login/bootstrap"
+	"api-login/config"
 	cron "api-login/crontask"
-	"api-login/filter"
 	_ "api-login/routers"
 	"fmt"
-	"standard-library/config"
 	initilize "standard-library/initialize"
 	"standard-library/validation"
 
 	"github.com/beego/beego/v2/server/web"
-	"github.com/beego/beego/v2/server/web/filter/cors"
 )
 
 func main() {
+	if err := bootstrap.InitApp(); err != nil {
+		panic(err)
+	}
+
 	// Init required information
 	initilize.InitLogs()
 	initilize.InitES()
@@ -25,21 +28,10 @@ func main() {
 	initilize.InitGRPC()
 	validation.Init()
 
-	web.InsertFilter("*", web.BeforeRouter, cors.Allow(&cors.Options{
-		AllowAllOrigins:  true,
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Token", "Language"},
-		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin"},
-		AllowCredentials: true,
-	}), web.WithReturnOnOutput(true))
-
-	web.InsertFilter("/user/*", web.BeforeRouter, filter.LoginManager)
+	bootstrap.ConfigureWeb()
 
 	// Cron Job
 	cron.InitCronTask()
-
-	// To enable getting json body for the request instead of onlu using form-data
-	web.BConfig.CopyRequestBody = true
 
 	web.Run(fmt.Sprintf(":%d", config.HttpPort))
 }

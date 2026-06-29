@@ -1,12 +1,12 @@
 package system
 
 import (
-	"api-login/models"
 	"api-login/models/dto"
+	"api-login/repositories"
+	"api-login/services"
 	"fmt"
 	"standard-library/consts"
 	"standard-library/nacos"
-	"standard-library/redis"
 	"standard-library/utility"
 	"standard-library/validation"
 	"time"
@@ -38,10 +38,8 @@ func (ctl *ForgetPasswordController) ForgetPasswordGetCode() {
 		ctl.Error(consts.PARAM_ERROR)
 	}
 
-	acc := models.Account{}
-	acc.Username = req.Username
-	db := utility.NewDB()
-	err := db.Get(&acc, "Username")
+	repo := repositories.NewAccountRepository()
+	acc, err := repo.GetByUsername(req.Username)
 	if err != nil {
 		logs.Error("[ForgetPasswordController][ForgetPasswordGetCode] Account not found", err)
 		ctl.Error(consts.USERNAME_NOT_FOUND)
@@ -84,7 +82,7 @@ func (ctl *ForgetPasswordController) ForgetPasswordGetCode() {
 //	@Title			注册
 //	@Description	注册
 //	@Success		200	string	"success"
-//	@router			/forgetpassword [get]
+//	@router			/forgetpassword [post]
 func (ctl *ForgetPasswordController) ForgetPassword() {
 	req := dto.ReqForgetPasswordSetNew{}
 
@@ -97,42 +95,16 @@ func (ctl *ForgetPasswordController) ForgetPassword() {
 		ctl.Error(consts.PARAM_ERROR)
 	}
 
-	db := utility.NewDB()
-
-	acc := models.Account{}
-	acc.Username = req.Username
-	acc.Email = req.Email
-	err := db.Get(&acc, "Username")
+	service := services.NewAccountService()
+	errCode, err := service.ResetPassword(req)
 	if err != nil {
-		logs.Error("[ForgetPasswordController][ForgetPassword] Account not found", err)
-		ctl.Error(consts.USERNAME_NOT_FOUND)
+		logs.Error("[ForgetPasswordController][ForgetPassword] reset password error:", err)
 	}
-
-	if req.Email != acc.Email {
-		logs.Error("[ForgetPasswordController][ForgetPassword] Email not match.")
-		ctl.Error(consts.FORGET_PASSWORD_EMAIL_NOT_MATCH)
-	}
-
-	// Check Valid Code
-	ex, _ := redis.Exists(fmt.Sprintf(consts.ForgetPasswordEmailValidCode, req.Email))
-	if ex {
-		defer utility.DelEmailValidCodeLock(req.Email)
-		validCode, _ := redis.Get(fmt.Sprintf(consts.ForgetPasswordEmailValidCode, req.Email))
-		if validCode != req.ValidCode {
-			logs.Error("[ForgetPasswordController][ForgetPassword] Valid Code not match. Please try again")
-			ctl.Error(consts.VALID_CODE_NOT_MATCH)
+	if err != nil || errCode != 0 {
+		if errCode == 0 {
+			errCode = consts.OPERATION_FAILED
 		}
-	} else {
-		ctl.Error(consts.VALID_CODE_NOT_MATCH)
-	}
-
-	acc.SetHashPassword(req.Password)
-	acc.SetUpdateTime()
-
-	_, err = db.Update(&acc, "Password", "UpdateTime")
-	if err != nil {
-		logs.Error("[ForgetPasswordController][ForgetPassword] Update account error. %+v , error: %+v", acc, err)
-		ctl.Error(consts.DB_UPDATE_FAILED)
+		ctl.Error(errCode)
 	}
 
 	ctl.Success("success")

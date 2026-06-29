@@ -10,7 +10,6 @@ import (
 	"standard-library/json"
 	"standard-library/jwt"
 	"standard-library/nacos"
-	"strings"
 	"time"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -109,7 +108,12 @@ func (ctl *BaseController) CommonRequestMicroService(data string, api func(conte
 		Data: data,
 	}
 
-	response, _ := api(ctx, request)
+	response, err := api(ctx, request)
+	if err != nil || response == nil {
+		logs.Error("[BaseController][CommonRequestMicroService] grpc call failed. service=%s err=%v", ctl.GrpcServiceName, err)
+		ctl.Error(consts.SERVER_ERROR)
+		return
+	}
 	if response.Code != consts.SUCCESS_REQUEST && response.Code != 0 {
 		if response.Data != "" {
 			ctl.Error(response.Code, response.Data)
@@ -155,12 +159,7 @@ func (ctl *PermissionController) CheckLogin() {
 
 	ctl.AccountId = loginToken.AccountId
 	ctl.Username = loginToken.UserName
-	requestUrl := ctl.Ctx.Request.URL.String()
-	charIndex := strings.Index(requestUrl, "?")
-	if charIndex >= 0 {
-		requestUrl = requestUrl[0:charIndex]
-	}
-	ctl.RequestUrl = requestUrl
+	ctl.RequestUrl = ctl.Ctx.Request.URL.Path
 
 }
 

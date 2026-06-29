@@ -14,7 +14,7 @@ import (
 
 var LoginManager = func(ctx *context.Context) {
 	// 返回值值
-	var responseText = `{"Code":10008,"Msg":"Not Login"}`
+	var responseText = `{"Code":10008,"Msg":"Not Login","Data":null}`
 	token := ctx.Input.Header("Token")
 	requestUrl := ctx.Request.URL.String()
 	charIndex := strings.Index(requestUrl, "?")
@@ -28,35 +28,35 @@ var LoginManager = func(ctx *context.Context) {
 	// }
 
 	if len(token) == 0 {
-		logs.Error("[LoginFilter]Token Empty not login[Url](%s) [Token](%s)", requestUrl, token)
+		logs.Error("[LoginFilter] unauthorized request_url=%s token_present=%t", requestUrl, token != "")
 		goto NoLogin
 	} else {
 		tokenMap := jwt.Parse(token, nacos.TokenSalt)
 		if tokenMap == nil {
-			logs.Error("[LoginFilter]FromToken Failed Not Login[Url](%s) [Token](%s)", requestUrl, token)
+			logs.Error("[LoginFilter] unauthorized request_url=%s token_present=%t", requestUrl, token != "")
 			goto NoLogin
 		}
 
 		// 获取对应的用户信息
 		accountId, exist := tokenMap["AccountId"]
 		if !exist || accountId == nil {
-			logs.Error("[LoginFilter]Get admin Id Failed Not Login[Url](%s) [Token](%s)", requestUrl, token)
+			logs.Error("[LoginFilter] unauthorized request_url=%s token_present=%t", requestUrl, token != "")
 			goto NoLogin
 		}
 
 		// 超过最长登陆时间，需要重新登陆
 		username, err := redis.Get(fmt.Sprintf(consts.AccountLoginByToken, token))
 		if err != nil || len(username) == 0 {
-			logs.Error("[LoginFilter]Token Not exist %v, %v", requestUrl, accountId)
+			logs.Error("[LoginFilter] unauthorized request_url=%s account_id=%v token_present=%t", requestUrl, accountId, token != "")
 			goto NoLogin
 		} else {
 			redisToken, err := redis.Get(fmt.Sprintf(consts.AccountLoginByUsername, username))
 			if err != nil || len(redisToken) == 0 {
-				logs.Error("[LoginFilter]Username Not exist %v, %v", requestUrl, username)
+				logs.Error("[LoginFilter] unauthorized request_url=%s username=%s token_present=%t", requestUrl, username, token != "")
 				goto NoLogin
 			} else {
 				if redisToken != token {
-					fmt.Print("[LoginFilter] Token not same")
+					logs.Error("[LoginFilter] unauthorized request_url=%s username=%s token_present=%t", requestUrl, username, token != "")
 					goto NoLogin
 				}
 			}
@@ -67,6 +67,6 @@ var LoginManager = func(ctx *context.Context) {
 
 NoLogin:
 	response := ctx.ResponseWriter
-	response.Header().Add("content-type", "application/json")
+	response.Header().Set("content-type", "application/json")
 	_, _ = response.Write([]byte(responseText))
 }

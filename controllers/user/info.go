@@ -3,8 +3,9 @@ package user
 import (
 	account "api-login-proto/account"
 	"api-login/controllers/system"
-	"api-login/models"
 	"api-login/models/dto"
+	"api-login/repositories"
+	"api-login/services"
 	"standard-library/consts"
 	"standard-library/validation"
 
@@ -19,6 +20,11 @@ type InfoController struct {
 
 func (ctl *InfoController) Prepare() {
 	ctl.PermissionController.Prepare()
+	ctl.ConnGRpc("service-account")
+	ctl.GRPCClient = account.NewUserAccountServiceClient(ctl.GrpcConn.Conn())
+	if ctl.GRPCClient == nil {
+		ctl.Error(consts.SERVER_ERROR)
+	}
 }
 
 // Detail
@@ -40,43 +46,16 @@ func (ctl *InfoController) Detail() {
 		ctl.Error(consts.PARAM_ERROR)
 	}
 
-	acc := models.Account{}
 	req.AccountId = ctl.AccountId
-	// Method 1
-	// acc.Id = req.AccountId
-	// db := utility.NewDB()
-
-	// err := db.Get(&acc, "Id")
-	// if err != nil {
-	// 	logs.Error("[InfoController][Detail]")
-	// }
-
-	// End Method 1
-
-	// Method 2
-	account, errCode, err := acc.SelfInfo()
-	if err != nil || errCode != 0 {
-		if errCode == 0 {
-			errCode = consts.OPERATION_FAILED
-		}
-		logs.Error("[RegisterController][Register]Db error:", err)
-		ctl.Error(errCode)
+	repo := repositories.NewAccountRepository()
+	accountInfo, err := repo.Detail(req)
+	if err != nil {
+		logs.Error("[InfoController][Detail] query account detail error:", err)
+		ctl.Error(consts.DB_GET_FAILED)
+		return
 	}
 
-	// tx, err := db.Begin()
-	// if err != nil {
-	// 	logs.Error(err)
-	// }
-	// defer tx.Commit()
-
-	// acc.SetUpdateTime()
-	// _, err = tx.Update(&acc, "UpdateTime")
-	// if err != nil {
-	// 	logs.Error("[InfoController][Detail]Update Error:", err)
-	// }
-
-	// ctl.Success(web.M{"Info": acc}) // -> Method 1
-	ctl.Success(web.M{"Info": account})
+	ctl.Success(web.M{"Info": accountInfo})
 }
 
 // Detail
@@ -95,14 +74,14 @@ func (ctl *InfoController) Edit() {
 		logs.Error("[InfoController][Edit] Parse Form Error", err)
 		ctl.Error(consts.FAILED_REQUEST)
 	}
+	req.AccountId = ctl.AccountId
 	if err := validation.ValidateRequest(&req); err != nil {
 		logs.Error("[InfoController][Edit]FormValidate fail, req : %+v, error: %+v", req, err)
 		ctl.Error(consts.PARAM_ERROR)
 	}
 
-	acc := models.Account{}
-	acc.Id = req.AccountId
-	errCode, err := acc.Edit(req)
+	service := services.NewAccountService()
+	errCode, err := service.EditProfile(ctl.AccountId, req)
 	if err != nil || errCode != 0 {
 		if errCode == 0 {
 			errCode = consts.OPERATION_FAILED

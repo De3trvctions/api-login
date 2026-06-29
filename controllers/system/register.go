@@ -1,8 +1,8 @@
 package system
 
 import (
-	"api-login/models"
 	"api-login/models/dto"
+	"api-login/services"
 	"fmt"
 	"standard-library/consts"
 	"standard-library/redis"
@@ -50,8 +50,8 @@ func (ctl *RegisterController) Register() {
 		ctl.Error(consts.VALID_CODE_NOT_MATCH)
 	}
 
-	acc := models.Account{}
-	errCode, err := acc.Register(req)
+	service := services.NewAccountService()
+	errCode, err := service.Register(req)
 	if err != nil || errCode != 0 {
 		if errCode == 0 {
 			errCode = consts.OPERATION_FAILED
